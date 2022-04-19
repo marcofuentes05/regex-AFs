@@ -6,11 +6,31 @@ from .utils.direct import *
 ABC = [letter for letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#0123456789\u03B5']
 IMAGES_DIRECTORY = '../tmp/'
 
+from logging.config import dictConfig
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
+
 def create_app(test_config = None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
+
+    app.logger.info('App successfuly started!')
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -97,10 +117,15 @@ def create_app(test_config = None):
                         alphabet.append(letra)
         alphabet.sort()
         alphabet.append("E")
-        may_proceed = alphabet_valid(alphabet, string) and parenthesis_validator(string) and parenthesis_validator(regex)
+        may_proceed = alphabet_valid(alphabet, string)
         if not may_proceed:
             return {
-                'message': 'Error! The string is not in the language described by the regex'
+                'message': 'Error! The string contains characters that are not in the alphabet.'
+            }
+        may_proceed = parenthesis_validator(regex)
+        if not may_proceed:
+            return {
+                'message': 'Error! The regex is not valid'
             }
         final_state = lexical_tree.thompson(arbolito, AFD_transitions, alphabet, AFN_transitions)
         result = lexical_tree.AFN_sym(string, AFN_transitions, 'S{}'.format(final_state-1))
@@ -146,10 +171,15 @@ def create_app(test_config = None):
         alphabet.sort()
         for j in tree.leaves:
             direct_table[str(j.value)]["is_leaf"] = True
-        may_proceed = alphabet_valid(alphabet, string) and parenthesis_validator(string) and parenthesis_validator(regex)
+        may_proceed = alphabet_valid(alphabet, string)
         if not may_proceed:
             return {
-                'message': 'Error! The string is not in the language described by the regex'
+                'message': 'Error! The string contains characters that are not in the alphabet.'
+            }
+        may_proceed = parenthesis_validator(regex)
+        if not may_proceed:
+            return {
+                'message': 'Error! The regex is not valid'
             }
         for node in tree.postorder:
             anulable(node, direct_table)
@@ -159,7 +189,7 @@ def create_app(test_config = None):
         transitions(AFD_transitions, tree, direct_table, alphabet)
         resultado = AFD_sym_direct(AFD_transitions, test_string, str(tree.right.value), alphabet, tree)
         return {
-            'regex': augmented_regex,
+            'regex': regex,
             'string': test_string,
             'result': 'ACCEPTED' if resultado else 'REJECTED',
         }
