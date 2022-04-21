@@ -2,30 +2,34 @@ import os
 from flask import Flask, request, send_from_directory
 from .utils.lexical import *
 from .utils.direct import *
+import logging 
 
 ABC = [letter for letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#0123456789\u03B5']
 IMAGES_DIRECTORY = '../tmp/'
 
 from logging.config import dictConfig
 
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': 'INFO',
-        'handlers': ['wsgi']
-    }
-})
+# dictConfig({
+#     'version': 1,
+#     'formatters': {'default': {
+#         'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+#     }},
+#     'handlers': {'wsgi': {
+#         'class': 'logging.StreamHandler',
+#         'stream': 'ext://flask.logging.wsgi_errors_stream',
+#         'formatter': 'default'
+#     }},
+#     'root': {
+#         'level': 'INFO',
+#         'handlers': ['wsgi']
+#     }
+# })
 
 def create_app(test_config = None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
+    logging.basicConfig(filename='error.log',level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000 # Files should not be larger than 16MB
+    
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
@@ -193,6 +197,30 @@ def create_app(test_config = None):
             'string': test_string,
             'result': 'ACCEPTED' if resultado else 'REJECTED',
         }
+
+    def upload_file():
+        if 'file' not in request.files:
+            app.logger.error('No file part')
+            return None
+        file = request.files['file']
+        string = ''
+        for line in file:
+            for character in line.decode('utf-8'):
+                if character != '\n':
+                    string += character
+        return string
+
+    @app.route('/upload_cocor', methods=['POST'])
+    def upload_cocor():
+        file = upload_file()
+        if file == None:
+            app.logger.error('No file part')
+            return {'message': 'No file part'}
+        app.logger.info('File uploaded')
+        return {
+            'message': 'Success!',
+        }
+        
 
     @app.route('/thompson')
     def thompson():
