@@ -1,5 +1,3 @@
-from distutils import core
-from sre_constants import IN
 from flaskr.utils.direct import *
 from flaskr.utils.lexical import *
 from functools import reduce
@@ -130,8 +128,6 @@ TOKENS = {
     'SPECIAL_CHARACTER': '^(\(|\)|\;|\+|\=|\{|\}|\.|\<|\>)$'
 }
 
-print(TOKENS['SPECIAL_CHARACTER'])
-
 KEYWORDS = [
     'for',
     'int',
@@ -188,8 +184,6 @@ for counter in range(len(input_stream) + 1):
                 break
     avance += 1
 
-print('inicio', inicio)
-print('avance', avance)
 if is_evaluating:
     print('LEXICAL ERROR')
     print(inicio)
