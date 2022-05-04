@@ -2,11 +2,13 @@ COMPILER ArchivoPrueba2
 
 CHARACTERS 
 
-letra = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
+letra = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + CHR(9).
 digito = "01234567890".
 digitoHex = digito + "ABCDEF".
+letra0 = letra - "a".
 tab = CHR(9).
 
+// KEYWORDS CHARACTERS COMPILER  */
 
 KEYWORDS
 

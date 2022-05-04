@@ -2,28 +2,14 @@ import os
 from flask import Flask, request, send_from_directory
 from .utils.lexical import *
 from .utils.direct import *
+from .utils.p1 import *
+from .utils.analizador_lexico import *
 import logging 
 
 ABC = [letter for letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#0123456789\u03B5']
 IMAGES_DIRECTORY = '../tmp/'
 
 from logging.config import dictConfig
-
-# dictConfig({
-#     'version': 1,
-#     'formatters': {'default': {
-#         'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-#     }},
-#     'handlers': {'wsgi': {
-#         'class': 'logging.StreamHandler',
-#         'stream': 'ext://flask.logging.wsgi_errors_stream',
-#         'formatter': 'default'
-#     }},
-#     'root': {
-#         'level': 'INFO',
-#         'handlers': ['wsgi']
-#     }
-# })
 
 def create_app(test_config = None):
     app = Flask(__name__)
@@ -168,10 +154,11 @@ def create_app(test_config = None):
             i.value = counter
             counter +=1
         for leaf in tree.leaves:
-            for character in ABC:
-                if character == direct_table[str(leaf.value)]["value"]:
-                    if character not in alphabet:
-                        alphabet.append(character)
+            if direct_table[str(leaf.value)]["value"] in ABC and direct_table[str(leaf.value)]["value"] not in alphabet:
+            # for character in ABC:
+            #     if character == direct_table[str(leaf.value)]["value"]:
+            #         if character not in alphabet:
+                        alphabet.append(direct_table[str(leaf.value)]["value"])
         alphabet.sort()
         for j in tree.leaves:
             direct_table[str(j.value)]["is_leaf"] = True
@@ -198,7 +185,88 @@ def create_app(test_config = None):
             'result': 'ACCEPTED' if resultado else 'REJECTED',
         }
 
-    def upload_file():
+    def core_direct_fixed(regex, string):
+        re = '({})#'.format(regex)
+        cadena=string
+        #Se hace el arbol
+        af = Analyzer(re)
+        tree = af.build_sintax_tree()
+        #Diccionario con la data para cada nodo anulable, primera pos...
+        data = {}
+        #Tabla de transiciones
+        transiciones= {}
+        #operadores
+        letras='*|?+'
+        #Caracteres en hojas de arbol
+        alfabeto=[]
+        arbol = tree
+        contador = 1
+        #Se llena el diccionario de datos con la cantidad de nodos
+        for i in arbol.postorder:
+            data[str(contador)] = {
+                "value": chr(i.value),
+                "node_value": i.value,
+                "anulable": None,
+                "primera_pos": None,
+                "ultima_pos": None,
+                "siguiente_pos": [],
+                "is_leaf": False,
+            }
+            i.value = contador
+            contador +=1
+        #Se obtienen los caracteres de las hojas
+        for hoja in arbol.leaves:
+            for letra in letras:
+                if letra != data[str(hoja.value)]["value"]:
+                    if data[str(hoja.value)]["value"] not in alfabeto:
+                        alfabeto.append(data[str(hoja.value)]["value"])
+        alfabeto.sort()
+        for j in arbol.leaves:
+            data[str(j.value)]["is_leaf"] = True
+
+        # Se hacen las fuciones anulable, primera pos, ultimo pos y siguiente pos para llenar la data
+        for node in arbol.postorder:
+            af.anulable(node, data)
+            af.first_pos(node, data)
+            af.last_pos(node, data)
+            af.next_pos(node, data)
+        
+        #Se llena la tabla de transiciones
+        af.transiciones(transiciones, arbol, data, alfabeto)
+        # Se simula el afd
+        resultado = af.simulacion(transiciones, cadena, str(arbol.right.value), alfabeto)
+
+
+        #Se dibuja el afd
+        dot = graphviz.Digraph(comment="AFD", format='png')
+        dot.attr(rankdir="LR")
+
+        #Se hacen los nodos
+        for key in transiciones.keys():
+            states = key.replace("[","")
+            states = states.replace("]","")
+            states = states.replace(" ","")
+            states = states.split(",")
+            if str(arbol.right.value) in states:
+                dot.node(transiciones[key]["name"], transiciones[key]["name"], shape='doublecircle')
+            else:
+                dot.node(transiciones[key]["name"], transiciones[key]["name"], shape='circle')
+                
+        #Se hacen las transiciones
+        for key, v in transiciones.items():
+            for c in alfabeto:
+                if v["name"] != None and v[c] != None:
+                    dot.edge(v["name"], v[c], c)
+
+        dot.render(directory='tmp', filename='AFD-direct')
+        return {
+            'regex': regex,
+            'string': string,
+            'result': 'ACCEPTED' if resultado else 'REJECTED',
+        }
+
+
+    def file_to_string():
         if 'file' not in request.files:
             app.logger.error('No file part')
             return None
@@ -208,15 +276,18 @@ def create_app(test_config = None):
             for character in line.decode('utf-8'):
                 if character != '\n':
                     string += character
+                else:
+                    string += chr(219) # Esto me ayuda con los comentarios
         return string
 
     @app.route('/upload_cocor', methods=['POST'])
     def upload_cocor():
-        file = upload_file()
+        file = file_to_string()
         if file == None:
             app.logger.error('No file part')
             return {'message': 'No file part'}
         app.logger.info('File uploaded')
+        # Aqui tendria que ir el cocol_reader
         return {
             'message': 'Success!',
         }
@@ -228,7 +299,16 @@ def create_app(test_config = None):
 
     @app.route('/direct')
     def direct():
-        return core_direct(request.args.get("regex"), request.args.get("string"))
+        return core_direct_fixed(request.args.get("regex"), request.args.get("string"))
+
+    @app.route('/analyze')
+    def analyze_file():
+        file = file_to_string()
+        if file == None:
+            app.logger.error('No file part')
+            return {'message': 'No file part'}
+        app.logger.info('File uploaded')
+        return analyze(file)
 
     @app.route('/get_AF')
     def get_AF():

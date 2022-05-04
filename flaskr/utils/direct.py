@@ -2,9 +2,9 @@ from binarytree import Node
 import graphviz
 
 def anulable(state, data):
-    if data[str(state.value)]["value"] == "|":
+    if data[str(state.value)]["value"] == "|" and state.left and state.right:
         data[str(state.value)]["anulable"] = data[str(state.left.value)]["anulable"] or data[str(state.right.value)]["anulable"]
-    elif data[str(state.value)]["value"] == ".":
+    elif data[str(state.value)]["value"] == "." and state.left and state.right:
         data[str(state.value)]["anulable"] = data[str(state.left.value)]["anulable"] and data[str(state.right.value)]["anulable"]
     elif data[str(state.value)]["value"] == "*":
         data[str(state.value)]["anulable"] = True
@@ -18,9 +18,9 @@ def anulable(state, data):
         data[str(state.value)]["anulable"] = False
 
 def first_position(state, data):
-    if data[str(state.value)]["value"] == "|":
+    if data[str(state.value)]["value"] == "|" and state.left and state.right:
         data[str(state.value)]["first_position"] = [item for sublist in [data[str(state.left.value)]["first_position"], data[str(state.right.value)]["first_position"]] for item in sublist]
-    elif data[str(state.value)]["value"] == ".":
+    elif data[str(state.value)]["value"] == "." and state.left and state.right:
         if data[str(state.left.value)]["anulable"]:
             data[str(state.value)]["first_position"] = [item for sublist in [data[str(state.left.value)]["first_position"], data[str(state.right.value)]["first_position"]] for item in sublist]
         else:
@@ -37,9 +37,9 @@ def first_position(state, data):
         data[str(state.value)]["first_position"] = [state.value]
 
 def last_position(state, data):
-    if data[str(state.value)]["value"] == "|":
+    if data[str(state.value)]["value"] == "|" and state.left and state.right:
         data[str(state.value)]["last_position"] = [item for sublist in [data[str(state.left.value)]["last_position"], data[str(state.right.value)]["last_position"]] for item in sublist]
-    elif data[str(state.value)]["value"] == ".":
+    elif data[str(state.value)]["value"] == "." and state.left and state.right:
         if data[str(state.right.value)]["anulable"]:
             data[str(state.value)]["last_position"] = [item for sublist in [data[str(state.left.value)]["last_position"], data[str(state.right.value)]["last_position"]] for item in sublist]
         else:
@@ -56,7 +56,7 @@ def last_position(state, data):
         data[str(state.value)]["last_position"] = [state.value]
 
 def next_position(state, data):
-    if data[str(state.value)]["value"] == ".":
+    if data[str(state.value)]["value"] == "." and state.left and state.right:
         for left_last in data[str(state.left.value)]["last_position"]:
             for right_first in data[str(state.right.value)]["first_position"]:
                 if right_first not in data[str(state.left.value)]["next_position"]:
@@ -76,23 +76,29 @@ def transitions(transitions, tree, data, alphabet):
         transitions[str(data[str(tree.value)]["first_position"])][character] = None
     counter += 1
     should_continue = True
+    print(transitions)
     while(should_continue):
         initial_size = len(transitions)
         keys = list(transitions.keys())
         for key in keys:
             for character in alphabet:
+                print(character)
                 if transitions[key][character] == None:
                     new_state = []
-                    state = key.replace("[","")
-                    state = state.replace("]","")
-                    state = state.replace(" ","")
-                    state = state.split(",")
+
+                    state = key
+                    for specialChar in ['[', ']', ' ']:
+                        state = state.replace(specialChar, '')
+                    state = state.split(',')
+                    print('state: ', state)
+
                     for item in state:
-                        if data[str(item)]["value"] == character:
-                            new_state.append(data[str(item)]["next_position"])
+                        if data[str(item)]["value"] == character: new_state.append(data[str(item)]["next_position"])
+
                     new_state = [item for sublist in new_state for item in sublist]
                     new_state = list(set(new_state))
                     new_state.sort()
+                    print(new_state)
                     if len(new_state) > 0:
                         if str(new_state) not in transitions:
                             transitions[str(new_state)] = {
@@ -110,6 +116,7 @@ def transitions(transitions, tree, data, alphabet):
 
 # Simula AFD para metodo directo
 def AFD_sym_direct(transitions, cadena, final_char, alphabet, tree):
+    print('transitions', transitions)
     dot = graphviz.Digraph(comment="AFD", format='png')
     dot.attr(rankdir="LR")
 
