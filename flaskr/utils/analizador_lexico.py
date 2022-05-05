@@ -150,17 +150,19 @@ def analyze(input_stream):
     is_evaluating = False
     token_flow = ''
     for counter in range(len(input_stream) + 1):
-        is_evaluating = True
+        if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
         if temporal_lex in KEYWORDS:
             token_flow += 'KEYWORD '
             print('KEYWORD ')
             inicio = counter
+            is_evaluating = False
         elif temporal_lex == BLANK_SPACE:
             token_flow += 'BLANK_SPACE '
             print('BLANK_SPACE ')
             inicio = counter
+            is_evaluating = False
         # elif temporal_lex in SPECIAL_CHARACTERS:
         #     token_flow += 'SPECIAL_CHARACTER '
         #     print('SPECIAL_CHARACTER ')
