@@ -4,6 +4,7 @@
 #  ParserSpecifications
 #  END name .
 #  .
+from asyncio import events
 import enum
 import re
 from unicodedata import name
@@ -118,15 +119,17 @@ class CocoLReader:
             for error in self.errors:
                 print('{}{}'.format(bcolors.FAIL, error))
         self.transform_characters_regex()
+        for error in self.errors:
+            print(bcolors.FAIL + error)
 
     def get_cocol_tokens(self) -> None:
         inicio = 0 
         avance = 0
         inside_line_comment = False
         inside_block_comment = False
-        is_evaluating = False
+        is_evaluating = True
         for counter in range(len(self.input_stream) + 1):
-            is_evaluating = True
+            if counter == inicio: is_evaluating = True
             temporal_lex = self.input_stream[inicio:avance]
             # print('[{}]'.format(temporal_lex))
             if not (inside_line_comment or inside_block_comment):
@@ -134,17 +137,21 @@ class CocoLReader:
                     self.token_flow += temporal_lex
                     self.token_flow_list.append((temporal_lex, 'keyword'))
                     inicio = counter
+                    is_evaluating = False
                 elif temporal_lex == BLANK_SPACE:
                     # print('BLANK_SPACE')
                     self.token_flow += 'BLANK_SPACE '
                     inicio = counter
+                    is_evaluating = False
                 elif temporal_lex == MY_NEW_LINE:
                     self.token_flow += 'NEW_LINE '
                     inicio = counter
+                    is_evaluating = False
                 elif temporal_lex == COCOL_END_OF_LINE:
                     self.token_flow += 'END_OF_LINE '
                     self.token_flow_list.append((temporal_lex, 'END_OF_LINE'))
                     inicio = counter
+                    is_evaluating = False
                 # elif temporal_lex in SPECIAL_CHARACTERS:
                 #     token_flow += 'SPECIAL_CHARACTER '
                 #     print('SPECIAL_CHARACTER ')
@@ -187,16 +194,18 @@ class CocoLReader:
                     if temporal_lex[-1] == MY_NEW_LINE:
                         inside_line_comment = False
                         inicio = counter
+                        is_evaluating = False
                 elif inside_block_comment:
                     if temporal_lex[-2:] == END_MULTILINE_COMMENT_INDICATOR:
                         inside_block_comment = False
                         inicio = counter
+                        is_evaluating = False
             avance += 1
 
         if is_evaluating:
             self.token_flow += 'ERROR '
             self.token_flow_list.append((temporal_lex, 'LEXICAL ERROR'))
-            self.errors.append('LEXICAL ERROR @ {}'.format(avance))
+            self.errors.append('LEXICAL ERROR @ {} - {}'.format(avance, temporal_lex))
 
     def build_raw_compiler(self):
         # Evaluamos nombre al principio y al final
@@ -233,9 +242,19 @@ class CocoLReader:
                 for internal_key, internal_value in value.items():
                     print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
         
-    def transform_characters_regex(self):
+    def evaluate_kleene(self, kleene_token):
+        print(kleene_token)
+        kleene_token = kleene_token[1: -1]
+        ids = kleene_token.split('|')
+        return_string = ''
+        for id in  ids:
+            if id in self.raw_compiler['CHARACTERS'].keys():
+                return_string += f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})"
+        return f"({return_string})*"
 
-        print(f"{bcolors.OKGREEN}CHARACTERS{bcolors.ENDC}")
+    def transform_characters_regex(self):
+        self.regex_compiler['NAME'] = self.raw_compiler['NAME']
+        print(f"{bcolors.OKGREEN}TOKENS{bcolors.ENDC}")
         # TODO: Fix addition and substraction operations and figure out how to handle regex compiler 
         for identifier, value in self.raw_compiler['CHARACTERS'].items():
             # value es el array de (valor, token)
@@ -274,14 +293,27 @@ class CocoLReader:
         for identifier, value in self.raw_compiler['KEYWORDS'].items():
             value_token, token = value[0]
             if token == 'string':
-                self.regex_compiler['KEYWORDS'][identifier] = value_token#self.regex_compiler['KEYWORDS'][value]
+                self.regex_compiler['KEYWORDS'][identifier] = value_token[1:  -1] # self.regex_compiler['KEYWORDS'][value]
             else:
-                errors.append('KEYWORD ERROR')
+                errors.append('KEYWORD ERROR - {}'.format(value[0]))
 
         for identifier, value in self.raw_compiler['TOKENS'].items():
+            temporal_regex = ''
             for (value_token, token) in value:
-                pass
-        print(self.regex_compiler)
+                if token == 'ident':
+                    temporal_regex += f"({ reduce(everything_or,  self.regex_compiler['CHARACTERS'][value_token])})"
+                elif token == 'string':
+                    temporal_regex += f"({ value_token[1:-1] })"
+                elif token == 'kleene':
+                    temporal_regex += self.evaluate_kleene(value_token)
+            self.regex_compiler['TOKENS'][identifier] = temporal_regex
+        for key, value in self.regex_compiler.items() :
+            if key == 'NAME':
+                print('{}{}: {}{}'.format(bcolors.OKBLUE, key, bcolors.OKCYAN, value))
+            else:
+                print('{}{}'.format(bcolors.OKBLUE, key))
+                for internal_key, internal_value in value.items():
+                    print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
 
 
-reader = CocoLReader('tests/ArchivoPrueba2.atg')
+reader = CocoLReader('tests/ArchivoPrueba3.atg')
