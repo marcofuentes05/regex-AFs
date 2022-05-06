@@ -2,10 +2,10 @@ COMPILER ArchivoPrueba2
 
 CHARACTERS 
 
-letra = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + CHR(9).
+letra = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digito = "01234567890".
 digitoHex = digito + "ABCDEF".
-letra0 = letra - "a".
+// letra0 = letra - "a".
 tab = CHR(9).
 
 // KEYWORDS CHARACTERS COMPILER  */
@@ -13,11 +13,10 @@ tab = CHR(9).
 KEYWORDS
 
 si = "if".
-SI = IF.
+SI = "IF".
 para = "for".
 
 TOKENS
-
 identificador = letra{letra|digito} EXCEPT KEYWORDS.
 numero = digito{digito}.
 numeroHex = digitoHex{digitoHex}"H".

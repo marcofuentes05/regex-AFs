@@ -4,12 +4,11 @@
 #  ParserSpecifications
 #  END name .
 #  .
-from asyncio import events
-import enum
 import re
 from unicodedata import name
 from functools import reduce
 import copy
+from lexer_template import *
 
 
 class bcolors:
@@ -243,19 +242,17 @@ class CocoLReader:
                     print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
         
     def evaluate_kleene(self, kleene_token):
-        print(kleene_token)
         kleene_token = kleene_token[1: -1]
         ids = kleene_token.split('|')
-        return_string = ''
-        for id in  ids:
+        return_string = []
+        for index, id in  enumerate(ids):
             if id in self.raw_compiler['CHARACTERS'].keys():
-                return_string += f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})"
-        return f"({return_string})*"
+                return_string.append(f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
+        return f"({'|'.join(return_string)})*"
 
     def transform_characters_regex(self):
         self.regex_compiler['NAME'] = self.raw_compiler['NAME']
         print(f"{bcolors.OKGREEN}TOKENS{bcolors.ENDC}")
-        # TODO: Fix addition and substraction operations and figure out how to handle regex compiler 
         for identifier, value in self.raw_compiler['CHARACTERS'].items():
             # value es el array de (valor, token)
             temporal_string = []
@@ -293,7 +290,7 @@ class CocoLReader:
         for identifier, value in self.raw_compiler['KEYWORDS'].items():
             value_token, token = value[0]
             if token == 'string':
-                self.regex_compiler['KEYWORDS'][identifier] = value_token[1:  -1] # self.regex_compiler['KEYWORDS'][value]
+                self.regex_compiler['KEYWORDS'][value_token[1: -1]] = identifier # self.regex_compiler['KEYWORDS'][value]
             else:
                 errors.append('KEYWORD ERROR - {}'.format(value[0]))
 
@@ -306,7 +303,7 @@ class CocoLReader:
                     temporal_regex += f"({ value_token[1:-1] })"
                 elif token == 'kleene':
                     temporal_regex += self.evaluate_kleene(value_token)
-            self.regex_compiler['TOKENS'][identifier] = temporal_regex
+            self.regex_compiler['TOKENS'][identifier] = f"^{temporal_regex}$"
         for key, value in self.regex_compiler.items() :
             if key == 'NAME':
                 print('{}{}: {}{}'.format(bcolors.OKBLUE, key, bcolors.OKCYAN, value))
@@ -317,3 +314,6 @@ class CocoLReader:
 
 
 reader = CocoLReader('tests/ArchivoPrueba3.atg')
+compiler = reader.regex_compiler
+lexer = Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
+lexer.create_file('FINAL_TEST.py')

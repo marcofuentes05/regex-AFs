@@ -21,10 +21,10 @@ Mientras = "While".
 TOKENS
 
 identificador = letra{letra|digito} EXCEPT KEYWORDS.
-numero = digito{digito}.
 numeroDecimal = digito{digito}"."digito{digito}.
+numero = digito{digito}.
 numeroHex = digitoHex{digitoHex}"H".
 espacioEnBlanco = enBlanco{enBlanco}.
-cadena = comillas cualquiera comillas.
+cadena = comillas {cualquiera} comillas.
 
 END ArchivoPrueba3

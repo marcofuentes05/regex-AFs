@@ -9,7 +9,6 @@ CHARACTERS = [i for i in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']
 NUMBERS = [i for i in '0123456789']
 SPECIAL_CHARACTERS = [i for i in '\(\)\;\+\=\{\}\.\<\>']
 BLANK_SPACE = ' '
-NEW_LINE = chr(219)
 
 def alphabet_valid(alphabet, string):
     for letter in string:
@@ -155,17 +154,14 @@ def analyze(input_stream):
         if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
-        if temporal_lex in KEYWORDS and not re.match(temporal_lex, input_stream[inicio:avance + 1]):
-            token_flow += f"{{KEYWORDS[temporal_lex]}} "
+        if temporal_lex in KEYWORDS:
+            token_flow += 'KEYWORD '
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
         elif temporal_lex == BLANK_SPACE:
             token_flow += 'BLANK_SPACE '
             print('BLANK_SPACE ')
-            inicio = counter
-            is_evaluating = False
-        elif temporal_lex == NEW_LINE:
             inicio = counter
             is_evaluating = False
         # elif temporal_lex in SPECIAL_CHARACTERS:
@@ -186,7 +182,7 @@ def analyze(input_stream):
         #     inicio = counter
         else:
             for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, input_stream[inicio:avance + 1]) or input_stream[inicio:avance + 1] == temporal_lex ) and (not re.match(value, input_stream[inicio:avance + 2]) or input_stream[inicio:avance + 1] == temporal_lex ):
+                if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, input_stream[inicio:avance + 1]) or input_stream[inicio:avance + 1] == temporal_lex ):
                     print(key)
                     token_flow += '{} '.format(key)
                     inicio = counter
