@@ -232,6 +232,15 @@ class CocoLReader:
                 return_string.append(f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
         return f"({'|'.join(return_string)})*"
 
+    def evaluate_option(self, option_token):
+        option_token = option_token[1: -1]
+        ids = option_token.split('|')
+        return_string = []
+        for index, id in  enumerate(ids):
+            if id in self.raw_compiler['CHARACTERS'].keys():
+                return_string.append(f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
+        return f"({'|'.join(return_string)})?"
+
     def transform_characters_regex(self):
         self.regex_compiler['NAME'] = self.raw_compiler['NAME']
         print(f"{bcolors.OKGREEN}TOKENS{bcolors.ENDC}")
@@ -287,6 +296,8 @@ class CocoLReader:
                     temporal_regex += f"({ new_value if new_value not in REGEX_SPECIAL_CHARACTERS else modified_new_value})"
                 elif token == 'kleene':
                     temporal_regex += self.evaluate_kleene(value_token)
+                elif token == 'option':
+                    temporal_regex += self.evaluate_option(value_token)
             self.regex_compiler['TOKENS'][identifier] = f"^{temporal_regex}$"
         for key, value in self.regex_compiler.items() :
             if key == 'NAME':

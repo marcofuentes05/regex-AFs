@@ -5,7 +5,6 @@ from .utils.cocol_reader import CocoLReader
 from .utils.lexer_template import *
 from .utils.lexical import *
 from .utils.direct import *
-from .utils.p1 import *
 from .utils.analizador_lexico import *
 from .temp.LEXER import *
 import logging 
