@@ -11,8 +11,8 @@ BLANK_SPACE = ' '
 def everything_or(cumulative, current):
     return '{}|{}'.format(cumulative, current)
 
-KEYWORDS = {'if': 'si', 'for': 'para', 'while': 'mientras', 'WHILE': 'MIENTRAS', 'While': 'Mientras'}
-TOKENS = {'identificador': '^(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)((a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)|(0|1|2|3|4|5|6|7|8|9|0))*$', 'numeroDecimal': '^(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*(\\.)(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*$', 'numero': '^(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*$', 'numeroHex': '^(0|1|2|3|4|5|6|7|8|9|0|A|B|C|D|E|F)((0|1|2|3|4|5|6|7|8|9|0|A|B|C|D|E|F))*(H)$', 'espacioEnBlanco': '^(\t| )((\t| ))*$', 'cadena': '^(")((a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|0|\t| ))*(")$'}
+KEYWORDS = {'if': 'if'}
+TOKENS = {'id': '^(a|b|c|d|e|f|g|h|i)((a|b|c|d|e|f|g|h|i)|(0|1))*$', 'numero': '^(0|1)((0|1))*$'}
 
 def read_file(file_path):
     string = ''
@@ -29,7 +29,7 @@ def read_file(file_path):
 with open('test_file.txt', 'r') as file:
     for line in file:
         for character in line:
-            if character != '\n':
+            if character != '\n' and character != ' ':
                 input_stream += character
 
 compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
