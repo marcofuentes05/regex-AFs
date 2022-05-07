@@ -53,16 +53,15 @@ def analyze(input_stream):
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
-        elif not compiler_defines_blank:
-            if temporal_lex == BLANK_SPACE:
-                inicio = counter
-                is_evaluating = False
+        elif not compiler_defines_blank and temporal_lex == BLANK_SPACE:
+            inicio = counter
+            is_evaluating = False
         elif temporal_lex == NEW_LINE:
             inicio = counter
             is_evaluating = False
         else:
             for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), [*TOKENS.items(), *KEYWORDS.keys()], False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
+                if temporal_lex and re.match(value, temporal_lex): # and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), [*TOKENS.items(), *KEYWORDS.keys()], False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
                     print(key)
                     token_flow += '{{}} '.format(key)
                     inicio = counter

@@ -36,9 +36,9 @@ def read_file(file_path):
                     string += NEW_LINE
     return string
 
-compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
 
 def analyze(input_stream):
+    compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
     inicio = 0
     avance = 0
     is_evaluating = False
@@ -52,16 +52,15 @@ def analyze(input_stream):
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
-        elif not compiler_defines_blank:
-            if temporal_lex == BLANK_SPACE:
-                inicio = counter
-                is_evaluating = False
+        elif not compiler_defines_blank and temporal_lex == BLANK_SPACE:
+            inicio = counter
+            is_evaluating = False
         elif temporal_lex == NEW_LINE:
             inicio = counter
             is_evaluating = False
         else:
             for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), [*TOKENS.items(), *KEYWORDS.keys()], False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
+                if temporal_lex and re.match(value, temporal_lex): # and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), [*TOKENS.items(), *KEYWORDS.keys()], False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
                     temp = [character for character in input_stream[avance:]]
                     res = list(accumulate(temp, lambda x, y: "".join([x, y])))
                     remainder_stream = [f"{{temporal_lex}}{{element}}" for element in res]

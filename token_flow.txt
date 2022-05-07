@@ -160,3 +160,11 @@ cadena espacioEnBlanco numero
 cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
 cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
 cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+
+numero numero id id id numero if 
+numero numero id id id numero if if numero 
+numero numero id id id numero if 
+numero numero id id id numero if id numero 
+numero numero id id id numero if id numero 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
