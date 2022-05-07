@@ -153,34 +153,14 @@ class CocoLReader:
                     self.token_flow_list.append((temporal_lex, 'END_OF_LINE'))
                     inicio = counter
                     is_evaluating = False
-                # elif temporal_lex in SPECIAL_CHARACTERS:
-                #     token_flow += 'SPECIAL_CHARACTER '
-                #     print('SPECIAL_CHARACTER ')
-                #     inicio = counter
-                # elif temporal_lex in NUMBERS:
-                #     token_flow += 'NUMBER  '
-                #     print('NUMBER  ')
-                #     inicio = counter
-                # elif temporal_lex and re.match(TOKENS['identifier'], temporal_lex) and not re.match(TOKENS['identifier'], file_content[inicio:avance + 1]):
-                #     print('IDENTIFIER')
-                #     token_flow += 'IDENTIFIER '
-                #     inicio = counter
-                # elif temporal_lex and re.match(TOKENS['string'], temporal_lex):
-                #     print('STRING')
-                #     token_flow += 'STRING '
-                #     inicio = counter
                 elif temporal_lex == LINE_COMMENT_INDICATOR:
                     self.token_flow += 'LINE_COMMENT '
                     self.token_flow_list.append((temporal_lex, 'LINE_COMMENT'))
                     inside_line_comment = True
-                    # inicio += self.input_stream[inicio:].index(MY_NEW_LINE)
-                    # avance = inicio
                 elif temporal_lex == START_MULTILINE_COMMENT_INDICATOR:
                     self.token_flow += 'START_MULTILINE_COMMENT '
                     self.token_flow_list.append((temporal_lex, 'START_MULTILINE_COMMENT'))
                     inside_block_comment = True
-                    # inicio += self.input_stream[inicio:].index(END_MULTILINE_COMMENT_INDICATOR)
-                    # avance = inicio
                 else:
                     for key, value in VOCABULARY_RE.items():
                         if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, self.input_stream[inicio:avance + 1]) or self.input_stream[inicio:avance + 1] == temporal_lex ):
@@ -317,7 +297,7 @@ class CocoLReader:
                     print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
 
 
-reader = CocoLReader('tests/ArchivoPrueba3.atg')
-compiler = reader.regex_compiler
-lexer = Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
-lexer.create_file('FINAL_TEST.py')
+# reader = CocoLReader('tests/ArchivoPrueba3.atg')
+# compiler = reader.regex_compiler
+# lexer = Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
+# lexer.create_file('FINAL_TEST.py')

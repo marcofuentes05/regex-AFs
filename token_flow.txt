@@ -53,3 +53,71 @@ cadena espacioEnBlanco numero
 cadena espacioEnBlanco numero 
 cadena espacioEnBlanco numero 
 cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+numero numero id id id numero if id numero 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numero identificador tabulador identificador para 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numero identificador tabulador identificador para 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador para 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador para 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador para 
+numero numero id id id numero if id numero 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero identificador cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+numero 
+numero numero id id id numero if id numero 
+numero numero id id id numero if id numero 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador para 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+NUMBER BLANK_SPACE NUMBER BLANK_SPACE ID BLANK_SPACE ID BLANK_SPACE ID BLANK_SPACE NUMBER BLANK_SPACE ID BLANK_SPACE ID BLANK_SPACE NUMBER 
+numero numero id id id numero if id numero 
+identificador identificador identificador identificador 
+identificador tabulador tabulador SI identificador identificador numero si identificador identificador numero numeroHex tabulador identificador para 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco numeroDecimal espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numero 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero espacioEnBlanco identificador espacioEnBlanco cadena 
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal espacioEnBlanco identificador espacioEnBlanco cadena 

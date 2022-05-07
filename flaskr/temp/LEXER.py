@@ -1,5 +1,4 @@
-from flaskr.utils.direct import *
-from flaskr.utils.lexical import *
+
 from functools import reduce
 import re
 input_stream = ''
@@ -29,7 +28,7 @@ def read_file(file_path):
 with open('test_file.txt', 'r') as file:
     for line in file:
         for character in line:
-            if character != '\n':
+            if character != '\n' and character != ' ':
                 input_stream += character
 
 compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)

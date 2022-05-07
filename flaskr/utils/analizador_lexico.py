@@ -146,7 +146,7 @@ with open('test_file.txt', 'r') as file:
 
 
 
-def analyze(input_stream):
+def oldAnalyze(input_stream):
     inicio = 0
     avance = 0
     is_evaluating = False

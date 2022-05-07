@@ -1,18 +1,24 @@
 import os
 from flask import Flask, request, send_from_directory
+
+from .utils.cocol_reader import CocoLReader
+from .utils.lexer_template import *
 from .utils.lexical import *
 from .utils.direct import *
 from .utils.p1 import *
 from .utils.analizador_lexico import *
+from .temp.LEXER import *
 import logging 
 
 ABC = [letter for letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#0123456789\u03B5']
 IMAGES_DIRECTORY = '../tmp/'
-
 from logging.config import dictConfig
 
 def create_app(test_config = None):
     app = Flask(__name__)
+    uploads_dir = os.path.join(app.instance_path, 'uploads')
+    # os.makedirs(uploads_dir)
+
     logging.basicConfig(filename='error.log',level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000 # Files should not be larger than 16MB
     
@@ -266,11 +272,7 @@ def create_app(test_config = None):
         }
 
 
-    def file_to_string():
-        if 'file' not in request.files:
-            app.logger.error('No file part')
-            return None
-        file = request.files['file']
+    def file_to_string(file):
         string = ''
         for line in file:
             for character in line.decode('utf-8'):
@@ -301,14 +303,44 @@ def create_app(test_config = None):
     def direct():
         return core_direct_fixed(request.args.get("regex"), request.args.get("string"))
 
-    @app.route('/analyze')
-    def analyze_file():
-        file = file_to_string()
-        if file == None:
+    @app.route('/get_lexer')
+    def get_lexer():
+        if 'file' not in request.files:
             app.logger.error('No file part')
-            return {'message': 'No file part'}
+            return None
+        uploaded_file = request.files['file']
+        uploaded_file.save(os.path.join(uploads_dir, uploaded_file.filename))
+
         app.logger.info('File uploaded')
-        return analyze(file)
+        reader = CocoLReader(os.path.join(uploads_dir, uploaded_file.filename))
+        compiler = reader.regex_compiler
+        if os.path.exists(app.root_path + '/temp/LEXER.py'):
+            os.remove(app.root_path + '/temp/LEXER.py')
+        Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
+        return send_from_directory('temp', 'LEXER.py', as_attachment=True)
+
+    @app.route('/execute_lexer')
+    def execute_lexer():
+        if 'file' not in request.files:
+            app.logger.error('No file part')
+            return None
+        uploaded_file = request.files['file']
+        if os.path.exists(os.path.join(uploads_dir, uploaded_file.filename)):
+            os.remove(os.path.join(uploads_dir, uploaded_file.filename))
+
+        uploaded_file.save(os.path.join(uploads_dir, uploaded_file.filename))
+
+        string = ''
+        with open(os.path.join(uploads_dir, uploaded_file.filename), 'r') as file:
+            for line in file:
+                for character in line:
+                    if character != '\n':
+                        string += character
+                    else:
+                        string += NEW_LINE
+
+        return analyze(string)
+        
 
     @app.route('/get_AF')
     def get_AF():

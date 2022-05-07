@@ -17,9 +17,6 @@ import re
 input_stream = ''
 NEW_LINE = chr(219)
 
-CHARACTERS = [i for i in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']
-NUMBERS = [i for i in '0123456789']
-SPECIAL_CHARACTERS = [i for i in '\(\)\;\+\=\{{\}}\.\<\>']
 BLANK_SPACE = ' '
 
 
@@ -47,7 +44,7 @@ with open('test_file.txt', 'r') as file:
             if character != '\\n' and character != ' ':
                 input_stream += character
 
-
+compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
 
 def analyze(input_stream):
     inicio = 0
@@ -64,16 +61,15 @@ def analyze(input_stream):
             inicio = counter
             is_evaluating = False
         elif temporal_lex == BLANK_SPACE:
-            # token_flow += 'BLANK_SPACE '
-            # print('BLANK_SPACE ')
-            inicio = counter
-            is_evaluating = False
+            if not compiler_defines_blank:
+                inicio = counter
+                is_evaluating = False
         elif temporal_lex == NEW_LINE:
             inicio = counter
             is_evaluating = False
         else:
             for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, input_stream[inicio:avance + 1]) or input_stream[inicio:avance + 1] == temporal_lex ) and (not re.match(value, input_stream[inicio:avance + 2]) or input_stream[inicio:avance + 2] == temporal_lex ):
+                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), TOKENS.items(), False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
                     print(key)
                     token_flow += '{{}} '.format(key)
                     inicio = counter
