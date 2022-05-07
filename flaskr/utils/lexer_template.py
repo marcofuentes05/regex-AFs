@@ -11,6 +11,7 @@ class Lexer:
         new_file_content = ''
         new_file_content = f"""
 from functools import reduce
+from itertools import accumulate
 import re
 input_stream = ''
 NEW_LINE = chr(219)
@@ -35,13 +36,6 @@ def read_file(file_path):
                     string += NEW_LINE
     return string
 
-
-with open('test_file.txt', 'r') as file:
-    for line in file:
-        for character in line:
-            if character != '\\n' and character != ' ':
-                input_stream += character
-
 compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
 
 def analyze(input_stream):
@@ -53,13 +47,13 @@ def analyze(input_stream):
         if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
-        if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), TOKENS.items(), False)):
+        if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), [*TOKENS.items(), *KEYWORDS.keys()], False)):
             token_flow += f"{{KEYWORDS[temporal_lex]}} "
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
-        elif temporal_lex == BLANK_SPACE:
-            if not compiler_defines_blank:
+        elif not compiler_defines_blank:
+            if temporal_lex == BLANK_SPACE:
                 inicio = counter
                 is_evaluating = False
         elif temporal_lex == NEW_LINE:
@@ -67,12 +61,19 @@ def analyze(input_stream):
             is_evaluating = False
         else:
             for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), TOKENS.items(), False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
-                    print(key)
-                    token_flow += '{{}} '.format(key)
-                    inicio = counter
-                    is_evaluating = False
-                    break
+                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), [*TOKENS.items(), *KEYWORDS.keys()], False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
+                    temp = [character for character in input_stream[avance:]]
+                    res = list(accumulate(temp, lambda x, y: "".join([x, y])))
+                    remainder_stream = [f"{{temporal_lex}}{{element}}" for element in res]
+                    string_has_match = lambda string : reduce(lambda accumulator, current: accumulator or re.fullmatch(current[1], string), [*TOKENS.items(), *KEYWORDS.keys()], False)
+                    char_flow_has_furhter_match = reduce(lambda accumulator, current: accumulator or string_has_match(current), remainder_stream, False)
+                    
+                    if not char_flow_has_furhter_match:
+                        print(key)
+                        token_flow += '{{}} '.format(key)
+                        inicio = counter
+                        is_evaluating = False
+                        break
         avance += 1
 
     if is_evaluating:
@@ -80,12 +81,13 @@ def analyze(input_stream):
         print(inicio)
         print(len(input_stream))
         return {{
-            'message': 'LEXICAL ERROR'
+            'token_flow': 'LEXICAL ERROR'
         }}
     else:
         print(token_flow, file=open('token_flow.txt', 'a'))
         return {{
-            'message': token_flow
+            'token_flow': token_flow,
+            'residue': temporal_lex
         }}
 
 if __name__ == '__main__':

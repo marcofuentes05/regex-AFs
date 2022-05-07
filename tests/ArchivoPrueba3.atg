@@ -21,7 +21,7 @@ Mientras = "While".
 TOKENS
 
 identificador = letra{letra|digito} EXCEPT KEYWORDS.
-numeroDecimal = digito{digito}"."digito{digito}.
+numeroDecimal = digito{digito}"."digito{digito}"NN".
 numero = digito{digito}.
 numeroHex = digitoHex{digitoHex}"H".
 espacioEnBlanco = enBlanco{enBlanco}.

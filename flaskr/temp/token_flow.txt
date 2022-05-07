@@ -1,0 +1,1 @@
+cadena espacioEnBlanco numeroDecimal espacioEnBlanco numeroDecimal espacioEnBlanco identificador espacioEnBlanco cadena 
