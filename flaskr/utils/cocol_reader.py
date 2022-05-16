@@ -275,7 +275,8 @@ class CocoLReader:
                 elif token == 'keyword' and value_token == 'CHR':
                     isChr = True
                 elif isChr:
-                    temporal_string.append(chr(int(value_token[1: -1])))
+                    temporal = chr(int(value_token[1: -1]))
+                    temporal_string.append(temporal if temporal not in REGEX_SPECIAL_CHARACTERS else f"\{temporal}")
             self.regex_compiler['CHARACTERS'][identifier] = temporal_string
 
         for identifier, value in self.raw_compiler['KEYWORDS'].items():
