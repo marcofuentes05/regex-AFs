@@ -113,8 +113,6 @@ class CocoLReader:
                     else:
                         self.input_stream += character
         self.get_cocol_tokens()
-        # for token in self.token_flow_list:
-        #     print(token)
         self.build_raw_compiler()
         if self.errors:
             for error in self.errors:
@@ -191,6 +189,8 @@ class CocoLReader:
     def build_raw_compiler(self):
         # Evaluamos nombre al principio y al final
         mode = ''
+        name_start = ''
+        name_end = ''
         for index, token in enumerate(self.token_flow_list):
             if token[0] in ['CHARACTERS', 'KEYWORDS', 'TOKENS'] and index > 0 and self.token_flow_list[index - 1][0] != 'EXCEPT':
                 mode = token[0]
@@ -211,7 +211,7 @@ class CocoLReader:
                         else:
                             break
                     self.raw_compiler[mode][token[0]] = temporal_array
-        if not (name_start and name_end) or (name_start != name_end):
+        if not (name_start=='' and name_end=='') or (name_start != name_end):
             print('No se encontró nombre del compilador')
             self.errors.append('COMPILER NAME')
         self.raw_compiler['NAME'] = name_start
@@ -309,7 +309,7 @@ class CocoLReader:
                     print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
 
 
-# reader = CocoLReader('tests/ArchivoPrueba3.atg')
-# compiler = reader.regex_compiler
+reader = CocoLReader('tests/ArchivoPrueba_prods.atg')
+compiler = reader.regex_compiler
 # lexer = Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
 # lexer.create_file('FINAL_TEST.py')

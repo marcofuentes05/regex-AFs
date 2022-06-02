@@ -1,7 +1,7 @@
 from flaskr.utils.direct import *
 from flaskr.utils.lexical import *
 from functools import reduce
-import re
+import regex as re
 input_stream = ''
 NEW_LINE = chr(219)
 
@@ -12,7 +12,7 @@ def everything_or(cumulative, current):
     return '{}|{}'.format(cumulative, current)
 
 KEYWORDS = {'if': 'if'}
-TOKENS = {'id': '^(a|b|c|d|e|f|g|h|i)((a|b|c|d|e|f|g|h|i)|(0|1))*$', 'numero': '^(0|1)((0|1))*$'}
+# tokens = {'id': '^(a|b|c|d|e|f|g|h|i)((a|b|c|d|e|f|g|h|i)|(0|1))*$', 'numero': '^(0|1)((0|1))*$'}
 
 def read_file(file_path):
     string = ''
@@ -32,9 +32,9 @@ with open('test_file.txt', 'r') as file:
             if character != '\n' and character != ' ':
                 input_stream += character
 
-compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), TOKENS.items(), False)
 
-def analyze(input_stream):
+def analyze(input_stream, tokens):
+    compiler_defines_blank = reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], BLANK_SPACE)), tokens.items(), False)
     inicio = 0
     avance = 0
     is_evaluating = False
@@ -43,7 +43,7 @@ def analyze(input_stream):
         if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
-        if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), TOKENS.items(), False)):
+        if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), tokens.items(), False)):
             token_flow += f"{KEYWORDS[temporal_lex]} "
             print('KEYWORD ')
             inicio = counter
@@ -56,8 +56,8 @@ def analyze(input_stream):
             inicio = counter
             is_evaluating = False
         else:
-            for key, value in TOKENS.items():
-                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), TOKENS.items(), False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), TOKENS.items(), False):
+            for key, value in tokens.items():
+                if temporal_lex and re.match(value, temporal_lex) and (not reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 1]), tokens.items(), False) or input_stream[inicio:avance + 1] == temporal_lex ) and not  reduce(lambda cummulative, value0: cummulative or re.match(value0[1], input_stream[inicio:avance + 2]), tokens.items(), False):
                     print(key)
                     token_flow += '{} '.format(key)
                     inicio = counter
