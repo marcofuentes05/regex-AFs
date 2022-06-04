@@ -120,11 +120,14 @@ class RecursiveDescentNode:
     def add_child(self, child):
         self.children.append(RecursiveDescentNode(child))
 
-    def get_children(self, terminals):
+    def get_children(self, terminals, non_terminals):
         children = []
         for child in self.children:
             if child.value in terminals:
                 children.append(child)
+            elif child.value in non_terminals:
+                children = [*children, *child.get_children(terminals, non_terminals)]
+        return children
 
     def __str__(self):
         return self.value
@@ -516,26 +519,33 @@ class CocoLReader:
         token_flow = analyze(self.input_string_prods, self.regex_compiler['TOKENS'])['message'].split(' ')
         terminals = [*self.regex_compiler['TOKENS'].keys()]
         non_terminals = [*self.regex_compiler['PRODUCTIONS'].keys()]
-        my_index = index
-        terminals_found = []
-        # state = RecursiveDescentNode([*self.regex_compiler['PRODUCTIONS'].keys()][0])
+        state = RecursiveDescentNode([*self.regex_compiler['PRODUCTIONS'].keys()][0])
+        productions = self.regex_compiler['PRODUCTIONS'][state.value]['elements'][0]
+        # print(state.get_children(terminals, non_terminals))
+        print(self.regex_compiler['PRODUCTIONS'])        
+           
+        # my_index = index
+        # terminals_found = []
 
-        for child in state.children:
-            if child.value in terminals:
-                if token_flow[my_index] == child.value:
-                    my_index += 1
-                    terminals_found.append(child.value)
-                    # return self.recursive_descent(state, my_index)
-            else:
-                temporal_node = RecursiveDescentNode(child.value)
-                for production in self.regex_compiler['PRODUCTIONS'][child.value]['elements'][0]:
-                    temporal_node.add_child(production[0])
-                terminals_found += self.recursive_descent(temporal_node, my_index)
-                    # my_index += 1
-                    # terminals_found.append(child.value)
-                    # return self.recursive_descent(state, my_index)
-        print(terminals_found)
-        return terminals_found
+        # for child in state.children:
+        #     if child.value in terminals:
+        #         if token_flow[my_index] == child.value:
+        #             my_index += 1
+        #             return terminals_found.append(child.value)
+        #         else:
+        #             pass
+        #             # return terminals_found
+        #             # return self.recursive_descent(state, my_index)
+        #     elif child.value in non_terminals:
+        #         temporal_node = RecursiveDescentNode(child.value)
+        #         for production in self.regex_compiler['PRODUCTIONS'][child.value]['elements'][0]:
+        #             temporal_node.add_child(production[0])
+        #         terminals_found += self.recursive_descent(temporal_node, my_index)
+        #             # my_index += 1
+        #             # terminals_found.append(child.value)
+        #             # return self.recursive_descent(state, my_index)
+        # print(terminals_found)
+        # return terminals_found
 
 
 
