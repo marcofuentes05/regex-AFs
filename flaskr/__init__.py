@@ -367,7 +367,6 @@ def create_app(test_config=None):
         token_value = analyze(string)['token_value'].split()
         Parser(token_flow, token_value, compiler['TOKENS'],
                compiler['PRODUCTIONS'], 'parser.py')
-
         return send_from_directory('temp', 'PARSER.py', as_attachment=True)
 
     @app.route('/execute_lexer')
