@@ -34,11 +34,11 @@ Termino <ref int resultado> =					(. resultado1, resultado2 = 0, 0.)
 	.
 
 Factor <ref int resultado> =					(. int signo = 1 .)
-	[		"-"									(. signo = -1. ) 
-	]
-	( 		Number <ref resultado>
+	{		"-"									(. signo = -1. ) 
+	}
+	{ 		Number <ref resultado>
 		  | "(" Expresion < ref resultado> ")"
-	)											(. resultado *= signo .)
+	}											(. resultado *= signo .)
 	.
 
 Number <ref int resultado> = numero				(. resultado = ultimoToken.obtenerValor() .)

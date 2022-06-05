@@ -316,62 +316,49 @@ class CocoLReader:
         return f"({'|'.join(return_string)})*"
 
     def evaluate_production_kleene(self, kleene_token):
-        # kleene_token = kleene_token[1: -1]
         inicio = 0
         avance = 0
         return_token_flow = []
         inside_line_comment = False
         inside_block_comment = False
         inside_action = False
-        is_evaluating = True
-        is_productions = False
-        is_in_string = False
-        # print(kleene_token)
+
         for counter in range(len(kleene_token) + 1):
             if counter == inicio:
                 is_evaluating = True
             temporal_lex = kleene_token[inicio:avance]
-            # print(temporal_lex)
+
             if not (inside_line_comment or inside_block_comment or inside_action):
                 if temporal_lex in COCOL_KEYWORDS:
-                    # self.token_flow += temporal_lex
                     return_token_flow.append((temporal_lex, 'keyword'))
                     is_productions = True
                     inicio = counter
                     is_evaluating = False
                 elif temporal_lex == BLANK_SPACE or temporal_lex == chr(9):
-                    # print('BLANK_SPACE')
-                    # self.token_flow += 'BLANK_SPACE '
                     inicio = counter
                     is_evaluating = False
                 elif temporal_lex == MY_NEW_LINE:
-                    # self.token_flow += 'NEW_LINE '
                     inicio = counter
                     is_evaluating = False
                 elif temporal_lex == COCOL_END_OF_LINE:
-                    # self.token_flow += 'END_OF_LINE '
                     return_token_flow.append((temporal_lex, 'END_OF_LINE'))
                     inicio = counter
                     is_evaluating = False
                 elif temporal_lex == LINE_COMMENT_INDICATOR:
-                    # self.token_flow += 'LINE_COMMENT '
                     return_token_flow.append((temporal_lex, 'LINE_COMMENT'))
                     inside_line_comment = True
                 elif temporal_lex == START_MULTILINE_COMMENT_INDICATOR:
-                    # self.token_flow += 'START_MULTILINE_COMMENT '
                     return_token_flow.append(
                         (temporal_lex, 'START_MULTILINE_COMMENT'))
                     inside_block_comment = True
                 elif temporal_lex == COCOL_START_PRODUCTION_ACTION:
                     self.token_flow += 'START_PRODUCTION_ACTION '
-                    # return_token_flow.append((temporal_lex, 'START_PRODUCTION_ACTION'))
                     inside_action = True
                 else:
                     for key, value in VOCABULARY_RE.items():
                         if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, kleene_token[inicio:avance + 1]) or kleene_token[inicio:avance + 1] == temporal_lex):
                             if key == 'group' and temporal_lex[-2] == '"':
                                 break
-                            # self.token_flow += '{} '.format(key)
                             return_token_flow.append((temporal_lex, key))
                             inicio = counter
                             is_evaluating = False
@@ -395,11 +382,6 @@ class CocoLReader:
                             (temporal_lex, 'production_action'))
                         is_evaluating = False
             avance += 1
-
-        # if is_evaluating:
-        #     # self.token_flow += 'ERROR '
-        #     return_token_flow.append((temporal_lex, 'LEXICAL ERROR'))
-        #     self.errors.append('LEXICAL ERROR @ {} - {}'.format(avance, temporal_lex))
         return return_token_flow
 
     def evaluate_option(self, option_token):
@@ -460,7 +442,6 @@ class CocoLReader:
         for identifier, value in self.raw_compiler['KEYWORDS'].items():
             value_token, token = value[0]
             if token == 'string':
-                # self.regex_compiler['KEYWORDS'][value]
                 self.regex_compiler['KEYWORDS'][value_token[1: -1]
                                                 ] = identifier
             else:
@@ -481,29 +462,14 @@ class CocoLReader:
                     temporal_regex += self.evaluate_option(value_token)
             self.regex_compiler['TOKENS'][identifier] = f"^{temporal_regex}$"
 
-        # Ahora vemos las prods
         for identifier, value in self.raw_compiler['PRODUCTIONS'].items():
-            # print(value)
             new_term = {
                 'elements': [[]],
                 'type': '',
                 'action': None
             }
-            # Termino: {
-            #    right_side: [
-            #       {
-            #          element,
-            #          type: 'TERMINAL'|'NON_TERMINAL'|'KLEENE',
-            #          actions: ''
-            #       }
-            #   ],
-            # }
-
-            # Primero hay que identificar anonimous tokens DONE
-            # Primero deberia hacer un tipo flatten de los elementos y luego concretar mi estructura de datos
             for index, (value_token, token) in enumerate(value):
                 # Ignoramos params y/o acciones
-                # print('value: ', value)/
                 if token == 'production_action':
                     action_has_params = value[index -
                                               1][1] == 'production_parameter'

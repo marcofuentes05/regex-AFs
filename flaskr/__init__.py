@@ -360,7 +360,10 @@ def create_app(test_config=None):
                         string += character
                     else:
                         string += NEW_LINE
-        token_flow = analyze(string)['token_flow'].split()
+        token_flow = analyze(string)['token_flow']
+        if token_flow == 'LEXICAL ERROR':
+            return {'message': 'LEXICAL ERROR'}
+        token_flow = token_flow.split()
         token_value = analyze(string)['token_value'].split()
         Parser(token_flow, token_value, compiler['TOKENS'],
                compiler['PRODUCTIONS'], 'parser.py')

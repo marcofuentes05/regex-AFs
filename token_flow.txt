@@ -9207,3 +9207,17 @@ numeroToken anonimous_token_mas numeroToken anonimous_token_* numeroToken anonim
 numeroToken anonimous_token_mas numeroToken anonimous_token_* numeroToken anonimous_token_; numeroToken anonimous_token_mas numeroToken anonimous_token_; numeroToken anonimous_token_; 
 numeroToken anonimous_token_mas numeroToken anonimous_token_* numeroToken anonimous_token_; numeroToken anonimous_token_mas numeroToken anonimous_token_; numeroToken anonimous_token_; 
 numeroToken anonimous_token_mas numeroToken anonimous_token_* numeroToken anonimous_token_; numeroToken anonimous_token_mas numeroToken anonimous_token_; numeroToken anonimous_token_; 
+anonimous_token_- numero 
+anonimous_token_- numero 
+anonimous_token_- numero 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 
+anonimous_token_- numero anonimous_token_+ numero anonimous_token_* 

@@ -4,7 +4,7 @@ class Parser:
         self.token_value = token_value
         self.terminals = terminals
         self.productions = productions
-        self.create_file(name)
+        self.create_file("flaskr/temp/LEXER.py")
 
     def create_file(self, file_name: str) -> bool:
         new_file_content = f"""from flaskr.utils.direct import *
@@ -143,6 +143,6 @@ if __name__ == '__main__':
 
 """
 
-        file = open(file_name, 'w')
+        file = open(file_name, "x")
         file.write(new_file_content)
         file.close()
