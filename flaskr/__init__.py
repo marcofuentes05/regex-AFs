@@ -1,26 +1,31 @@
+from logging.config import dictConfig
 import os
+from re import S
 from flask import Flask, request, send_from_directory
 
 from .utils.cocol_reader import CocoLReader
 from .utils.lexer_template import *
+from .utils.parser_template import *
 from .utils.lexical import *
 from .utils.direct import *
 from .utils.analizador_lexico import *
 from .temp.LEXER import *
-import logging 
+import logging
 
 ABC = [letter for letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#0123456789\u03B5']
 IMAGES_DIRECTORY = '../tmp/'
-from logging.config import dictConfig
 
-def create_app(test_config = None):
+
+def create_app(test_config=None):
     app = Flask(__name__)
     uploads_dir = os.path.join(app.instance_path, 'uploads')
     # os.makedirs(uploads_dir)
 
-    logging.basicConfig(filename='error.log',level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000 # Files should not be larger than 16MB
-    
+    logging.basicConfig(filename='error.log', level=logging.DEBUG,
+                        format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * \
+        1000  # Files should not be larger than 16MB
+
     app.config.from_mapping(
         SECRET_KEY='dev',
     )
@@ -54,7 +59,7 @@ def create_app(test_config = None):
     def string_middleware(string):
         for c in range(0, len(string), 1):
             if string[c] == "+":
-                sub_string = string[:c] # [0 ... c]
+                sub_string = string[:c]  # [0 ... c]
                 postr = string[c+1:]    # [c+1 ... len(string)]
                 contador = 0
                 subs = ""
@@ -64,22 +69,22 @@ def create_app(test_config = None):
                         contador += 1
                         if contador != 1:
                             subs = string[sub_string_pointer] + subs
-                        sub_string_pointer-=1
+                        sub_string_pointer -= 1
 
-                    elif string[sub_string_pointer] =="(":
+                    elif string[sub_string_pointer] == "(":
                         contador -= 1
-                        if contador == 0 :
-                            sub_string_pointer = -1 
+                        if contador == 0:
+                            sub_string_pointer = -1
                         else:
                             subs = string[sub_string_pointer] + subs
                             sub_string_pointer -= 1
                     else:
                         if contador != 0:
-                            subs = string[sub_string_pointer] +subs
-                            sub_string_pointer-=1
+                            subs = string[sub_string_pointer] + subs
+                            sub_string_pointer -= 1
                         else:
                             subs = string[sub_string_pointer]
-                            sub_string_pointer=-1
+                            sub_string_pointer = -1
 
                 if len(subs) != 1:
                     return "{}*({}){}".format(sub_string, subs, postr)
@@ -89,12 +94,12 @@ def create_app(test_config = None):
                 return string
 
     def core_thompson(regex, string):
-        string = string_middleware(string) # Fix '+' character
+        string = string_middleware(string)  # Fix '+' character
         lexical_tree = Tree(regex)
         tree = lexical_tree.get_tree()
         AFD_transitions = {}
-        alphabet=[]
-        AFN_transitions={}
+        alphabet = []
+        AFN_transitions = {}
         arbolito = tree
         counter = 1
         for element in tree.postorder:
@@ -104,7 +109,7 @@ def create_app(test_config = None):
                 "final_state": None,
             }
             element.value = counter
-            counter +=1
+            counter += 1
         for hoja in arbolito.leaves:
             for letra in ABC:
                 if letra == AFD_transitions[str(hoja.value)]["value"]:
@@ -122,13 +127,16 @@ def create_app(test_config = None):
             return {
                 'message': 'Error! The regex is not valid'
             }
-        final_state = lexical_tree.thompson(arbolito, AFD_transitions, alphabet, AFN_transitions)
-        result = lexical_tree.AFN_sym(string, AFN_transitions, 'S{}'.format(final_state-1))
+        final_state = lexical_tree.thompson(
+            arbolito, AFD_transitions, alphabet, AFN_transitions)
+        result = lexical_tree.AFN_sym(
+            string, AFN_transitions, 'S{}'.format(final_state-1))
 
         AFD_transitions = {}
         lexical_tree.subsets(AFN_transitions, AFD_transitions, alphabet)
 
-        result = lexical_tree.AFD_sym_subsets(AFD_transitions, string, 'S{}'.format(final_state-1))
+        result = lexical_tree.AFD_sym_subsets(
+            AFD_transitions, string, 'S{}'.format(final_state-1))
 
         return {
             'regex': regex,
@@ -136,15 +144,15 @@ def create_app(test_config = None):
             'result': 'ACCEPTED' if result else 'REJECTED',
         }
 
-    def core_direct(regex, string): 
-        string = string_middleware(string) # Fix '+' character
+    def core_direct(regex, string):
+        string = string_middleware(string)  # Fix '+' character
         augmented_regex = '({})#'.format(regex)
         test_string = string
         lexical_tree = Tree(augmented_regex)
         tree = lexical_tree.get_tree()
         direct_table = {}
-        alphabet=[]
-        AFD_transitions= {}
+        alphabet = []
+        AFD_transitions = {}
         counter = 1
         for i in tree.postorder:
             direct_table[str(counter)] = {
@@ -157,13 +165,13 @@ def create_app(test_config = None):
                 "is_leaf": False,
             }
             i.value = counter
-            counter +=1
+            counter += 1
         for leaf in tree.leaves:
             if direct_table[str(leaf.value)]["value"] in ABC and direct_table[str(leaf.value)]["value"] not in alphabet:
-            # for character in ABC:
-            #     if character == direct_table[str(leaf.value)]["value"]:
-            #         if character not in alphabet:
-                        alphabet.append(direct_table[str(leaf.value)]["value"])
+                # for character in ABC:
+                #     if character == direct_table[str(leaf.value)]["value"]:
+                #         if character not in alphabet:
+                alphabet.append(direct_table[str(leaf.value)]["value"])
         alphabet.sort()
         for j in tree.leaves:
             direct_table[str(j.value)]["is_leaf"] = True
@@ -183,7 +191,8 @@ def create_app(test_config = None):
             last_position(node, direct_table)
             next_position(node, direct_table)
         transitions(AFD_transitions, tree, direct_table, alphabet)
-        resultado = AFD_sym_direct(AFD_transitions, test_string, str(tree.right.value), alphabet, tree)
+        resultado = AFD_sym_direct(AFD_transitions, test_string, str(
+            tree.right.value), alphabet, tree)
         return {
             'regex': regex,
             'string': test_string,
@@ -192,21 +201,21 @@ def create_app(test_config = None):
 
     def core_direct_fixed(regex, string):
         re = '({})#'.format(regex)
-        cadena=string
-        #Se hace el arbol
+        cadena = string
+        # Se hace el arbol
         af = Analyzer(re)
         tree = af.build_sintax_tree()
-        #Diccionario con la data para cada nodo anulable, primera pos...
+        # Diccionario con la data para cada nodo anulable, primera pos...
         data = {}
-        #Tabla de transiciones
-        transiciones= {}
-        #operadores
-        letras='*|?+'
-        #Caracteres en hojas de arbol
-        alfabeto=[]
+        # Tabla de transiciones
+        transiciones = {}
+        # operadores
+        letras = '*|?+'
+        # Caracteres en hojas de arbol
+        alfabeto = []
         arbol = tree
         contador = 1
-        #Se llena el diccionario de datos con la cantidad de nodos
+        # Se llena el diccionario de datos con la cantidad de nodos
         for i in arbol.postorder:
             data[str(contador)] = {
                 "value": chr(i.value),
@@ -218,8 +227,8 @@ def create_app(test_config = None):
                 "is_leaf": False,
             }
             i.value = contador
-            contador +=1
-        #Se obtienen los caracteres de las hojas
+            contador += 1
+        # Se obtienen los caracteres de las hojas
         for hoja in arbol.leaves:
             for letra in letras:
                 if letra != data[str(hoja.value)]["value"]:
@@ -235,29 +244,31 @@ def create_app(test_config = None):
             af.first_pos(node, data)
             af.last_pos(node, data)
             af.next_pos(node, data)
-        
-        #Se llena la tabla de transiciones
+
+        # Se llena la tabla de transiciones
         af.transiciones(transiciones, arbol, data, alfabeto)
         # Se simula el afd
-        resultado = af.simulacion(transiciones, cadena, str(arbol.right.value), alfabeto)
+        resultado = af.simulacion(
+            transiciones, cadena, str(arbol.right.value), alfabeto)
 
-
-        #Se dibuja el afd
+        # Se dibuja el afd
         dot = graphviz.Digraph(comment="AFD", format='png')
         dot.attr(rankdir="LR")
 
-        #Se hacen los nodos
+        # Se hacen los nodos
         for key in transiciones.keys():
-            states = key.replace("[","")
-            states = states.replace("]","")
-            states = states.replace(" ","")
+            states = key.replace("[", "")
+            states = states.replace("]", "")
+            states = states.replace(" ", "")
             states = states.split(",")
             if str(arbol.right.value) in states:
-                dot.node(transiciones[key]["name"], transiciones[key]["name"], shape='doublecircle')
+                dot.node(
+                    transiciones[key]["name"], transiciones[key]["name"], shape='doublecircle')
             else:
-                dot.node(transiciones[key]["name"], transiciones[key]["name"], shape='circle')
-                
-        #Se hacen las transiciones
+                dot.node(transiciones[key]["name"],
+                         transiciones[key]["name"], shape='circle')
+
+        # Se hacen las transiciones
         for key, v in transiciones.items():
             for c in alfabeto:
                 if v["name"] != None and v[c] != None:
@@ -270,7 +281,6 @@ def create_app(test_config = None):
             'result': 'ACCEPTED' if resultado else 'REJECTED',
         }
 
-
     def file_to_string(file):
         string = ''
         for line in file:
@@ -278,7 +288,7 @@ def create_app(test_config = None):
                 if character != '\n':
                     string += character
                 else:
-                    string += chr(219) # Esto me ayuda con los comentarios
+                    string += chr(219)  # Esto me ayuda con los comentarios
         return string
 
     @app.route('/upload_cocor', methods=['POST'])
@@ -292,7 +302,6 @@ def create_app(test_config = None):
         return {
             'message': 'Success!',
         }
-        
 
     @app.route('/thompson')
     def thompson():
@@ -318,6 +327,46 @@ def create_app(test_config = None):
         Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
         return send_from_directory('temp', 'LEXER.py', as_attachment=True)
 
+    @app.route('/get_parser')
+    def get_parser():
+        if 'file' not in request.files:
+            app.logger.error('No file part')
+            return None
+        uploaded_file = request.files['file']
+        uploaded_file.save(os.path.join(uploads_dir, uploaded_file.filename))
+
+        app.logger.info('File uploaded')
+        reader = CocoLReader(os.path.join(uploads_dir, uploaded_file.filename))
+        compiler = reader.regex_compiler
+        if os.path.exists(app.root_path + '/temp/LEXER.py'):
+            os.remove(app.root_path + '/temp/LEXER.py')
+        Lexer(compiler['NAME'], compiler['KEYWORDS'], compiler['TOKENS'])
+
+        if 'input_file' not in request.files:
+            app.logger.error('No file part')
+            return None
+
+        uploaded_file = request.files['input_file']
+        if os.path.exists(os.path.join(uploads_dir, uploaded_file.filename)):
+            os.remove(os.path.join(uploads_dir, uploaded_file.filename))
+
+        uploaded_file.save(os.path.join(uploads_dir, uploaded_file.filename))
+
+        string = ''
+        with open(os.path.join(uploads_dir, uploaded_file.filename), 'r') as file:
+            for line in file:
+                for character in line:
+                    if character != '\n':
+                        string += character
+                    else:
+                        string += NEW_LINE
+        token_flow = analyze(string)['token_flow'].split()
+        token_value = analyze(string)['token_value'].split()
+        Parser(token_flow, token_value, compiler['TOKENS'],
+               compiler['PRODUCTIONS'], 'parser.py')
+
+        return send_from_directory('temp', 'PARSER.py', as_attachment=True)
+
     @app.route('/execute_lexer')
     def execute_lexer():
         if 'file' not in request.files:
@@ -339,7 +388,6 @@ def create_app(test_config = None):
                         string += NEW_LINE
 
         return analyze(string)
-        
 
     @app.route('/get_AF')
     def get_AF():
@@ -353,7 +401,7 @@ def create_app(test_config = None):
             if is_deterministic:
                 return send_from_directory(IMAGES_DIRECTORY, 'AFD-subsets.png', as_attachment=True)
             else:
-              return send_from_directory(IMAGES_DIRECTORY, 'AFN-thompson.png', as_attachment=True)
+                return send_from_directory(IMAGES_DIRECTORY, 'AFN-thompson.png', as_attachment=True)
         else:
             return send_from_directory(IMAGES_DIRECTORY, 'AFD-direct.png', as_attachment=True)
     return app

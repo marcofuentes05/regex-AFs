@@ -11,8 +11,8 @@ BLANK_SPACE = ' '
 def everything_or(cumulative, current):
     return '{}|{}'.format(cumulative, current)
 
-KEYWORDS = {'if': 'si', 'for': 'para', 'while': 'mientras', 'WHILE': 'MIENTRAS', 'While': 'Mientras'}
-TOKENS = {'identificador': '^(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)((a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)|(0|1|2|3|4|5|6|7|8|9|0))*$', 'numero': '^(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*(num)$', 'numeroDecimal': '^(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*(\\.)(0|1|2|3|4|5|6|7|8|9|0)((0|1|2|3|4|5|6|7|8|9|0))*$', 'numeroHex': '^(0|1|2|3|4|5|6|7|8|9|0|A|B|C|D|E|F)((0|1|2|3|4|5|6|7|8|9|0|A|B|C|D|E|F))*(H)$', 'espacioEnBlanco': '^(\t| )((\t| ))*$', 'cadena': '^(\\.|\\+)((a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|0|\t| ))*(\\.|\\+)$'}
+KEYWORDS = {}
+TOKENS = {'numero': '^(0|1|2|3|4|5|6|7|8|9)((0|1|2|3|4|5|6|7|8|9))*$', 'IGNORE': '^$', 'anonimous_token_;': '^;$', 'anonimous_token_+': '^\\+$', 'anonimous_token_*': '^\\*$'}
 
 def read_file(file_path):
     string = ''
@@ -32,12 +32,14 @@ def analyze(input_stream):
     avance = 0
     is_evaluating = False
     token_flow = ''
+    token_value = ''
     for counter in range(len(input_stream) + 1):
         if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
         if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), [*TOKENS.items(), *KEYWORDS.keys()], False)):
             token_flow += f"{KEYWORDS[temporal_lex]} "
+            token_value += f"{temporal_lex} "
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
@@ -59,6 +61,7 @@ def analyze(input_stream):
                     if not char_flow_has_furhter_match:
                         print(key)
                         token_flow += '{} '.format(key)
+                        token_value += '{} '.format(temporal_lex)
                         inicio = counter
                         is_evaluating = False
                         break
@@ -74,6 +77,7 @@ def analyze(input_stream):
     else:
         print(token_flow, file=open('token_flow.txt', 'a'))
         return {
+            'token_value': token_value,
             'token_flow': token_flow,
             'residue': temporal_lex
         }
