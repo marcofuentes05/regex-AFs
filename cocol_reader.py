@@ -11,6 +11,7 @@ import copy
 from lexer_template import *
 from LEXER import *
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -21,6 +22,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 MY_NEW_LINE = chr(219)
 
@@ -46,7 +48,7 @@ compiler_template = {
 }
 
 VOCABULARY_RE = {
-    # 'production_action': '^(\(\.)(.*)(\.\))$',
+    'production_action': '^(\(\.)(.*)(\.\))$',
     'ident': '^[a-zA-Z_][a-zA-Z0-9]*$',
     'number': '^[0-9]+',
     'string': '^(\")(.*)(\")$',
@@ -98,8 +100,10 @@ SPECIAL_CHARACTERS = {
 
 errors = []
 
+
 def everything_or(cumulative, current):
     return '{}|{}'.format(cumulative, current)
+
 
 def get_last_children(node, terminals):
     children = []
@@ -113,7 +117,8 @@ def get_last_children(node, terminals):
 
 class RecursiveDescentNode:
     def __init__(self, value):
-        self.children: list[RecursiveDescentNode] = [] # este va a ser de tipo [node]
+        # este va a ser de tipo [node]
+        self.children: list[RecursiveDescentNode] = []
         self.value: str = value
         self.parent = None
 
@@ -126,11 +131,13 @@ class RecursiveDescentNode:
             if child.value in terminals:
                 children.append(child)
             elif child.value in non_terminals:
-                children = [*children, *child.get_children(terminals, non_terminals)]
+                children = [*children, *
+                            child.get_children(terminals, non_terminals)]
         return children
 
     def __str__(self):
         return self.value
+
 
 class CocoLReader:
     def __init__(self, file_path: str):
@@ -155,24 +162,26 @@ class CocoLReader:
                 print('{}{}'.format(bcolors.FAIL, error))
         self.transform_characters_regex()
         self.input_string_prods = '3 + 4 * 5; '
-        initial_state = RecursiveDescentNode(self.regex_compiler['PRODUCTIONS']['EstadoInicial']['elements'][0][0])
+        initial_state = RecursiveDescentNode(
+            self.regex_compiler['PRODUCTIONS']['EstadoInicial']['elements'][0][0])
         initial_state.add_child('EstadoInicialPrime')
-        self.recursive_descent(initial_state)
+        # self.recursive_descent(initial_state)
         for error in self.errors:
             print(bcolors.FAIL + error)
 
     def print_compiler(self, compiler):
-        for key, value in compiler.items() :
+        for key, value in compiler.items():
             if key == 'NAME':
-                print('{}{}: {}{}'.format(bcolors.OKBLUE, key, bcolors.OKCYAN, value))
+                print('{}{}: {}{}'.format(
+                    bcolors.OKBLUE, key, bcolors.OKCYAN, value))
             else:
                 print('{}{}'.format(bcolors.OKBLUE, key))
                 for internal_key, internal_value in value.items():
-                    print ('{}{}:{}'.format(bcolors.OKCYAN, internal_key, internal_value)) 
-        
+                    print('{}{}:{}'.format(bcolors.OKCYAN,
+                          internal_key, internal_value))
 
     def get_cocol_tokens(self) -> None:
-        inicio = 0 
+        inicio = 0
         avance = 0
         inside_line_comment = False
         inside_block_comment = False
@@ -181,7 +190,8 @@ class CocoLReader:
         is_productions = False
         is_in_string = False
         for counter in range(len(self.input_stream) + 1):
-            if counter == inicio: is_evaluating = True
+            if counter == inicio:
+                is_evaluating = True
             temporal_lex = self.input_stream[inicio:avance]
             if not (inside_line_comment or inside_block_comment or inside_action):
                 if temporal_lex in COCOL_KEYWORDS:
@@ -210,7 +220,8 @@ class CocoLReader:
                     inside_line_comment = True
                 elif temporal_lex == START_MULTILINE_COMMENT_INDICATOR:
                     self.token_flow += 'START_MULTILINE_COMMENT '
-                    self.token_flow_list.append((temporal_lex, 'START_MULTILINE_COMMENT'))
+                    self.token_flow_list.append(
+                        (temporal_lex, 'START_MULTILINE_COMMENT'))
                     inside_block_comment = True
                 elif temporal_lex == COCOL_START_PRODUCTION_ACTION:
                     # self.token_flow += 'START_PRODUCTION_ACTION '
@@ -218,8 +229,8 @@ class CocoLReader:
                     inside_action = True
                 else:
                     for key, value in VOCABULARY_RE.items():
-                        if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, self.input_stream[inicio:avance + 1]) or self.input_stream[inicio:avance + 1] == temporal_lex ):
-                            if key=='group' and temporal_lex[-2]=='"': 
+                        if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, self.input_stream[inicio:avance + 1]) or self.input_stream[inicio:avance + 1] == temporal_lex):
+                            if key == 'group' and temporal_lex[-2] == '"':
                                 break
                             self.token_flow += '{} '.format(key)
                             self.token_flow_list.append((temporal_lex, key))
@@ -241,14 +252,16 @@ class CocoLReader:
                     if temporal_lex[-2:] == COCOL_END_PRODUCTION_ACTION:
                         inside_action = False
                         inicio = counter
-                        self.token_flow_list.append((temporal_lex, 'production_action'))
+                        self.token_flow_list.append(
+                            (temporal_lex, 'production_action'))
                         is_evaluating = False
             avance += 1
 
         if is_evaluating:
             self.token_flow += 'ERROR '
             self.token_flow_list.append((temporal_lex, 'LEXICAL ERROR'))
-            self.errors.append('LEXICAL ERROR @ {} - {}'.format(avance, temporal_lex))
+            self.errors.append(
+                'LEXICAL ERROR @ {} - {}'.format(avance, temporal_lex))
 
     def build_raw_compiler(self):
         # Evaluamos nombre al principio y al final
@@ -265,7 +278,8 @@ class CocoLReader:
                     name_end = self.token_flow_list[index + 1][0]
                 break
             if token[1] == 'ident':
-                if self.token_flow_list[index + 1][1] == 'assign': #si el siguiente es asignacion
+                # si el siguiente es asignacion
+                if self.token_flow_list[index + 1][1] == 'assign':
                     lista_temporal = self.token_flow_list[index + 2:]
                     temporal_array = []
                     for token_temporal in lista_temporal:
@@ -274,8 +288,10 @@ class CocoLReader:
                         else:
                             break
                     self.raw_compiler[mode][token[0]] = temporal_array
-                elif self.token_flow_list[index+1][1] == 'production_parameter' and self.token_flow_list[index + 2][1] == 'assign': # Por si es una prod con parametros
-                    lista_temporal = [self.token_flow_list[index + 1], *self.token_flow_list[index + 3:]]
+                # Por si es una prod con parametros
+                elif self.token_flow_list[index+1][1] == 'production_parameter' and self.token_flow_list[index + 2][1] == 'assign':
+                    lista_temporal = [
+                        self.token_flow_list[index + 1], *self.token_flow_list[index + 3:]]
                     temporal_array = []
                     for token_temporal in lista_temporal:
                         if token_temporal[1] != 'END_OF_LINE':
@@ -287,20 +303,21 @@ class CocoLReader:
             print('No se encontró nombre del compilador')
             self.errors.append('COMPILER NAME')
         self.raw_compiler['NAME'] = name_start
-        # self.print_compiler(self.raw_compiler)
-        
+        self.print_compiler(self.raw_compiler)
+
     def evaluate_kleene(self, kleene_token):
         kleene_token = kleene_token[1: -1]
         ids = kleene_token.split('|')
         return_string = []
-        for index, id in  enumerate(ids):
+        for index, id in enumerate(ids):
             if id in self.raw_compiler['CHARACTERS'].keys():
-                return_string.append(f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
+                return_string.append(
+                    f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
         return f"({'|'.join(return_string)})*"
 
     def evaluate_production_kleene(self, kleene_token):
         # kleene_token = kleene_token[1: -1]
-        inicio = 0 
+        inicio = 0
         avance = 0
         return_token_flow = []
         inside_line_comment = False
@@ -311,7 +328,8 @@ class CocoLReader:
         is_in_string = False
         # print(kleene_token)
         for counter in range(len(kleene_token) + 1):
-            if counter == inicio: is_evaluating = True
+            if counter == inicio:
+                is_evaluating = True
             temporal_lex = kleene_token[inicio:avance]
             # print(temporal_lex)
             if not (inside_line_comment or inside_block_comment or inside_action):
@@ -341,7 +359,8 @@ class CocoLReader:
                     inside_line_comment = True
                 elif temporal_lex == START_MULTILINE_COMMENT_INDICATOR:
                     # self.token_flow += 'START_MULTILINE_COMMENT '
-                    return_token_flow.append((temporal_lex, 'START_MULTILINE_COMMENT'))
+                    return_token_flow.append(
+                        (temporal_lex, 'START_MULTILINE_COMMENT'))
                     inside_block_comment = True
                 elif temporal_lex == COCOL_START_PRODUCTION_ACTION:
                     self.token_flow += 'START_PRODUCTION_ACTION '
@@ -349,8 +368,8 @@ class CocoLReader:
                     inside_action = True
                 else:
                     for key, value in VOCABULARY_RE.items():
-                        if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, kleene_token[inicio:avance + 1]) or kleene_token[inicio:avance + 1] == temporal_lex ):
-                            if key=='group' and temporal_lex[-2]=='"': 
+                        if temporal_lex and re.match(value, temporal_lex) and (not re.match(value, kleene_token[inicio:avance + 1]) or kleene_token[inicio:avance + 1] == temporal_lex):
+                            if key == 'group' and temporal_lex[-2] == '"':
                                 break
                             # self.token_flow += '{} '.format(key)
                             return_token_flow.append((temporal_lex, key))
@@ -372,7 +391,8 @@ class CocoLReader:
                     if temporal_lex[-2:] == COCOL_END_PRODUCTION_ACTION:
                         inside_action = False
                         inicio = counter
-                        return_token_flow.append((temporal_lex, 'production_action'))
+                        return_token_flow.append(
+                            (temporal_lex, 'production_action'))
                         is_evaluating = False
             avance += 1
 
@@ -382,14 +402,14 @@ class CocoLReader:
         #     self.errors.append('LEXICAL ERROR @ {} - {}'.format(avance, temporal_lex))
         return return_token_flow
 
-
     def evaluate_option(self, option_token):
         option_token = option_token[1: -1]
         ids = option_token.split('|')
         return_string = []
-        for index, id in  enumerate(ids):
+        for index, id in enumerate(ids):
             if id in self.raw_compiler['CHARACTERS'].keys():
-                return_string.append(f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
+                return_string.append(
+                    f"({reduce(everything_or, self.regex_compiler['CHARACTERS'][id])})")
         return f"({'|'.join(return_string)})?"
 
     def transform_characters_regex(self):
@@ -404,21 +424,27 @@ class CocoLReader:
                 if token == 'string':
                     if mode != None:
                         if mode == 'addition':
-                            temporal_string.extend([i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in value_token[1:-1]])
+                            temporal_string.extend(
+                                [i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in value_token[1:-1]])
                         else:
-                            temporal_string = [i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in temporal_string if i not in value_token[1:-1]]
+                            temporal_string = [
+                                i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in temporal_string if i not in value_token[1:-1]]
                         mode = None
                     else:
-                        temporal_string.extend([i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in value_token[1:-1]])
+                        temporal_string.extend(
+                            [i if i not in REGEX_SPECIAL_CHARACTERS else f"\{i}" for i in value_token[1:-1]])
                 elif token == 'ident':
                     if mode != None:
                         if mode == 'addition':
-                            temporal_string.extend(self.regex_compiler['CHARACTERS'][value_token])
+                            temporal_string.extend(
+                                self.regex_compiler['CHARACTERS'][value_token])
                         else:
-                            temporal_string = [i for i in temporal_string if i not in self.regex_compiler['CHARACTERS'][value_token]]
+                            temporal_string = [
+                                i for i in temporal_string if i not in self.regex_compiler['CHARACTERS'][value_token]]
                         mode = None
                     else:
-                        temporal_string.extend(self.regex_compiler['CHARACTERS'][value_token])
+                        temporal_string.extend(
+                            self.regex_compiler['CHARACTERS'][value_token])
                 elif token == 'addition':
                     mode = 'addition'
                 elif token == 'substraction':
@@ -427,13 +453,16 @@ class CocoLReader:
                     isChr = True
                 elif isChr:
                     temporal = chr(int(value_token[1: -1]))
-                    temporal_string.append(temporal if temporal not in REGEX_SPECIAL_CHARACTERS else f"\{temporal}")
+                    temporal_string.append(
+                        temporal if temporal not in REGEX_SPECIAL_CHARACTERS else f"\{temporal}")
             self.regex_compiler['CHARACTERS'][identifier] = temporal_string
 
         for identifier, value in self.raw_compiler['KEYWORDS'].items():
             value_token, token = value[0]
             if token == 'string':
-                self.regex_compiler['KEYWORDS'][value_token[1: -1]] = identifier # self.regex_compiler['KEYWORDS'][value]
+                # self.regex_compiler['KEYWORDS'][value]
+                self.regex_compiler['KEYWORDS'][value_token[1: -1]
+                                                ] = identifier
             else:
                 errors.append('KEYWORD ERROR - {}'.format(value[0]))
 
@@ -451,14 +480,14 @@ class CocoLReader:
                 elif token == 'option':
                     temporal_regex += self.evaluate_option(value_token)
             self.regex_compiler['TOKENS'][identifier] = f"^{temporal_regex}$"
-        
+
         # Ahora vemos las prods
         for identifier, value in self.raw_compiler['PRODUCTIONS'].items():
             # print(value)
             new_term = {
                 'elements': [[]],
                 'type': '',
-                'actions': []
+                'action': None
             }
             # Termino: {
             #    right_side: [
@@ -472,135 +501,106 @@ class CocoLReader:
 
             # Primero hay que identificar anonimous tokens DONE
             # Primero deberia hacer un tipo flatten de los elementos y luego concretar mi estructura de datos
-            for (value_token, token) in value:
-                #Ignoramos params y/o acciones
+            for index, (value_token, token) in enumerate(value):
+                # Ignoramos params y/o acciones
                 # print('value: ', value)/
-                if token in ('production_parameter', 'production_action'):
-                    # if token=='production_action':
-                        # new_term['actions'] += value_token
-                    pass
+                if token == 'production_action':
+                    action_has_params = value[index -
+                                              1][1] == 'production_parameter'
+                    is_this_element_action = (index == 0) or (
+                        action_has_params and index == 1)
+                    if is_this_element_action:
+                        if identifier in self.regex_compiler['PRODUCTIONS'].keys():
+                            self.regex_compiler['PRODUCTIONS'][identifier]['action'] = {
+                                'body': value_token[2:-2],
+                                'parameters': value[index-1][0] if action_has_params else False
+                            }
+                        else:
+                            self.regex_compiler['PRODUCTIONS'][identifier] = {
+                                **new_term,
+                                'action': {
+                                    'body': value_token[2:-2],
+                                    'parameters': value[index-1][0] if action_has_params else False
+                                }
+                            }
+
+                # if token in ('production_parameter', 'production_action'):
+                #     if identifier in self.regex_compiler['ACTIONS'].keys():
+                #         self.regex_compiler['ACTIONS'][identifier].append(
+                #             value_token)
+                #     else:
+                #         self.regex_compiler['ACTIONS'][identifier] = [
+                #             value_token]
+                #     pass
                 # Deshacemos cerraduras de kleene
                 elif token == 'kleene':
-                    print(value_token)
+                    # print(value_token)
+                    print(index)
+                    print(value[index])
+                    print(value[index-1][1])
+                    prev_index = index - 1
+                    next_index = index + 1
                     new_value = value_token[1: -1]
                     inside_kleene = self.evaluate_production_kleene(new_value)
                     identifier_prime = identifier+'Prime'
                     # print('INSIDE KLEENE\n',inside_kleene)
                     for index, (value_element, token_element) in enumerate(inside_kleene):
                         if token_element == 'string':
-                            # print(bcolors.WARNING, element, bcolors.ENDC)
-                            # Popular tokens anonimos
                             anonimous_token_value = value_element[1: -1]
                             safe_anonimous_token_value = f'\\{anonimous_token_value}'
                             new_token_name = f'anonimous_token_{value_element[1:-1]}'
-                            new_token_regex =f'^{safe_anonimous_token_value if anonimous_token_value in REGEX_SPECIAL_CHARACTERS else anonimous_token_value}$'
+                            new_token_regex = f'^{safe_anonimous_token_value if anonimous_token_value in REGEX_SPECIAL_CHARACTERS else anonimous_token_value}$'
                             self.regex_compiler['TOKENS'][new_token_name] = new_token_regex
-                            inside_kleene[index] = (new_token_name ,'ident')
+                            inside_kleene[index] = (new_token_name, 'ident')
+                        elif token in ('production_parameter', 'production_action'):
+                            if identifier in self.regex_compiler['ACTIONS'].keys():
+                                self.regex_compiler['ACTIONS'][identifier].append(
+                                    value_token)
+                            else:
+                                self.regex_compiler['ACTIONS'][identifier] = [
+                                    value_token]
                     new_term['type'] = 'kleene'
-                    new_term['elements'][0] += [(identifier_prime, 'ident')] # filter(lambda element: element[1] not in ('production_action', 'production_parameter'), inside_kleene)
+                    new_term['elements'][0] += [(identifier_prime, 'ident')]
                     self.regex_compiler['PRODUCTIONS'][identifier] = new_term
-                    self.regex_compiler['PRODUCTIONS'][identifier_prime] = {'elements': [[*filter(lambda element: element[1] not in ('production_action', 'production_parameter'), inside_kleene), (identifier_prime, 'ident')], [('epsilon', 'epsilon')]]}
-                elif token=='ident':
+                    self.regex_compiler['PRODUCTIONS'][identifier_prime] = {
+                        'elements': [[*filter(lambda element: element[1] not in (
+                            'production_action', 'production_parameter'), inside_kleene), (identifier_prime, 'ident')], [('epsilon', 'epsilon')]],
+                    }
+                    if value[prev_index][1] in ('production_parameter', 'production_action'):
+                        self.regex_compiler['PRODUCTIONS'][identifier_prime]['action'] = {
+                            'body': value[next_index][0][2: -2],
+                            'parameters': value[prev_index][1]
+                        }
+                elif token == 'ident':
+                    new_term_element = (value_token, token)
+                    if value[index+1][1] in ('production_action', 'production_parameter') and value[index + (2 if index+2 < len(value) else 1)][1] != 'kleene':
+                        has_parameters = value[index +
+                                               1][1] == 'production_parameter'
+                        new_term_element = (*new_term_element, {
+                            'body': value[index+2][0][2:-2] if has_parameters else value[index+1][0][2:-2],
+                            'parameters': value[index+1][0] if has_parameters else False
+                        })
+                    if identifier in self.regex_compiler['PRODUCTIONS'].keys():
+                        new_term['action'] = self.regex_compiler['PRODUCTIONS'][identifier]['action']
                     new_term['type'] = 'NON_TERMINAL'
-                    new_term['elements'][0] += [(value_token, token)]
+                    new_term['elements'][0] += [new_term_element]
                     self.regex_compiler['PRODUCTIONS'][identifier] = new_term
-                elif token=='string':
+                elif token == 'string':
                     # Agregar token anonimo a lista de tokens conocidos
                     anonimous_token_value = value_element[1: -1]
                     safe_anonimous_token_value = f'\\{anonimous_token_value}'
                     new_token_name = f'anonimous_token_{value_element[1:-1]}'
-                    new_token_regex =f'^{safe_anonimous_token_value if anonimous_token_value in REGEX_SPECIAL_CHARACTERS else anonimous_token_value}$'
+                    new_token_regex = f'^{safe_anonimous_token_value if anonimous_token_value in REGEX_SPECIAL_CHARACTERS else anonimous_token_value}$'
                     self.regex_compiler['TOKENS'][new_token_name] = new_token_regex
-                    new_term += [(value_element[1:-1] ,new_token_name)]
+                    new_term += [(value_element[1:-1], new_token_name)]
                     self.regex_compiler['PRODUCTIONS'][identifier] = new_term
-        self.print_compiler(self.regex_compiler) 
+        self.print_compiler(self.regex_compiler)
+        print()
+        print()
+        print()
+        print(self.regex_compiler['PRODUCTIONS'])
+        # print(self.regex_compiler['PRODUCTIONS']['Instruccion']['actions'])
 
-    def recursive_descent(self, state, index=0):
-        token_flow = analyze(self.input_string_prods, self.regex_compiler['TOKENS'])['message'].split(' ')
-        terminals = [*self.regex_compiler['TOKENS'].keys()]
-        non_terminals = [*self.regex_compiler['PRODUCTIONS'].keys()]
-        state = RecursiveDescentNode([*self.regex_compiler['PRODUCTIONS'].keys()][0])
-        productions = self.regex_compiler['PRODUCTIONS'][state.value]['elements'][0]
-        # print(state.get_children(terminals, non_terminals))
-        print(self.regex_compiler['PRODUCTIONS'])        
-           
-        # my_index = index
-        # terminals_found = []
-
-        # for child in state.children:
-        #     if child.value in terminals:
-        #         if token_flow[my_index] == child.value:
-        #             my_index += 1
-        #             return terminals_found.append(child.value)
-        #         else:
-        #             pass
-        #             # return terminals_found
-        #             # return self.recursive_descent(state, my_index)
-        #     elif child.value in non_terminals:
-        #         temporal_node = RecursiveDescentNode(child.value)
-        #         for production in self.regex_compiler['PRODUCTIONS'][child.value]['elements'][0]:
-        #             temporal_node.add_child(production[0])
-        #         terminals_found += self.recursive_descent(temporal_node, my_index)
-        #             # my_index += 1
-        #             # terminals_found.append(child.value)
-        #             # return self.recursive_descent(state, my_index)
-        # print(terminals_found)
-        # return terminals_found
-
-
-
-
-        # for production in self.regex_compiler['PRODUCTIONS'][state.value]['elements']:
-        #     for element in production:
-        #         state.add_child(element[0])
-        # print(state.value)
-
-        # # Expandimos el nodo inicial (estado inicial)
-        # for child in state.children:
-        #     if child.value in terminals:
-        #         pass
-        #     elif child.value in non_terminals:
-        #         for internal_prod in self.regex_compiler['PRODUCTIONS'][child.value]['elements']:
-        #             for element in internal_prod:
-        #                 child.add_child(element[0])
-        # sigue = True
-        # current_node = state
-        # print(token_flow)
-        # print(non_terminals)
-        # input_pointer = 0
-        # # counter = 0
-        # while sigue:
-        #     print(current_node.value)
-        #     for element in current_node.children:
-        #         print('ELEMENT.VALUE', element.value)
-        #         if element.value in terminals:
-        #             print('is terminal')
-        #             if element.value == token_flow[input_pointer]:
-        #                 if element.value == 'epsilon':
-        #                     pass
-        #                 else:
-        #                     input_pointer += 1
-        #                 # current_node = element
-        #                 # break
-        #         if element.value in non_terminals:
-        #             current_node = element
-        #             for internal_prod in self.regex_compiler['PRODUCTIONS'][element.value]['elements'][0]:
-        #                 # for internal_element in internal_prod:
-        #                 print(internal_prod)
-        #                 current_node.add_child(internal_prod[0])
-        #             print('is non terminal')
-        #             break
-        #             # exit(0)
-        #             # for internal_prod in self.regex_compiler['PRODUCTIONS'][element.value]['elements'][0]:
-        #             #     if internal_prod[0] in non_terminals:
-        #             #         input_pointer += 1
-        #             #         exit(1)
-        #             #         break
-        #     # counter += 1
-        #     # if counter > 5 : sigue=False
-        #     sigue = input_pointer<len(token_flow)
-        # print(get_last_children(state))
- 
 
 reader = CocoLReader('tests/ArchivoPrueba0_prods.atg')
 compiler = reader.regex_compiler
