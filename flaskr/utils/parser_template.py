@@ -1,24 +1,33 @@
-from flaskr.utils.direct import *
+class Parser:
+    def __init__(self, token_flow, token_value, terminals, productions, name):
+        self.token_flow = token_flow
+        self.token_value = token_value
+        self.terminals = terminals
+        self.productions = productions
+        self.create_file("flaskr/temp/LEXER.py")
+
+    def create_file(self, file_name: str) -> bool:
+        new_file_content = f"""from flaskr.utils.direct import *
 from http.client import RemoteDisconnected
 import numpy as np
 
 
-token_flow = ['anonimous_token_-', 'numero', 'anonimous_token_+', 'numero', 'anonimous_token_*']
-token_value = ['-', '5', '+', '4', '*']
-terminals = {'numero': '^(0|1|2|3|4|5|6|7|8|9)((0|1|2|3|4|5|6|7|8|9))*$', 'IGNORE': '^$', 'anonimous_token_;': '^;$', 'anonimous_token_+': '^\\+$', 'anonimous_token_*': '^\\*$', 'anonimous_token_-': '^-$'}
-productions = {'EstadoInicial': {'elements': [[('EstadoInicialPrime', 'ident')]], 'type': 'kleene', 'action': None}, 'EstadoInicialPrime': {'elements': [[('Instruccion', 'ident'), ('anonimous_token_;', 'ident'), ('EstadoInicialPrime', 'ident')], [('epsilon', 'epsilon')]]}, 'Instruccion': {'elements': [[('Expresion', 'ident', {'body': ' print(resultado) ', 'parameters': '<ref resultado>'})]], 'type': 'NON_TERMINAL', 'action': {'body': ' resultado=0 ', 'parameters': False}}, 'Expresion': {'elements': [[('Termino', 'ident'), ('ExpresionPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2= 0, 0 ', 'parameters': '<ref int resultado>'}}, 'ExpresionPrime': {'elements': [[('anonimous_token_+', 'ident'), ('Termino', 'ident'), ('ExpresionPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1 ', 'parameters': '<ref resultado1>'}}, 'Termino': {'elements': [[('Factor', 'ident'), ('TerminoPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2 = 0, 0', 'parameters': '<ref int resultado>'}}, 'TerminoPrime': {'elements': [[('anonimous_token_*', 'ident'), ('Factor', 'ident'), ('TerminoPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1 ', 'parameters': '<ref resultado1>'}}, 'Factor': {'elements': [[('FactorPrime', 'ident'), ('FactorPrime', 'ident')]], 'type': 'kleene', 'action': None}, 'FactorPrime': {'elements': [[('Number', 'ident'), ('FactorPrime', 'ident')], [('epsilon', 'epsilon')]]}, 'Number': {'elements': [[('numero', 'ident', {'body': ' resultado = ultimoToken.obtenerValor() ', 'parameters': False})]], 'type': 'NON_TERMINAL', 'action': None}}
+token_flow = {self.token_flow}
+token_value = {self.token_value}
+terminals = {self.terminals}
+productions = {self.productions}
 
 
 class bcolors:
-    HEADER = '[95m'
-    OKBLUE = '[94m'
-    OKCYAN = '[96m'
-    OKGREEN = '[92m'
-    WARNING = '[93m'
-    FAIL = '[91m'
-    ENDC = '[0m'
-    BOLD = '[1m'
-    UNDERLINE = '[4m'
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 non_terminals = [*productions.keys()]
@@ -33,9 +42,9 @@ def initialize_actions():
         if 'action' in productions[element].keys() and productions[element]['action'] is not None:
             parameters = ''.join([character for character in productions[element]['action']['parameters'].split(
                 ' ') if character not in ('<ref, int, >')])[0:-1] if productions[element]['action']['parameters'] else ''
-            file_content += f'def production_{element}({parameters}):\n\t'
+            file_content += f'def production_{{element}}({{parameters}}):\\n\\t'
             file_content += productions[element]['action']['body']
-            file_content += '\n\n'
+            file_content += '\\n\\n'
 
     file = open('functions.py', 'w')
     file.write(file_content)
@@ -86,16 +95,16 @@ class GramaticElementNode:
                             retreived_tokens.append('epsilon')
                             check_epsilon = True
                         else:
-                            print(bcolors.FAIL+f'INSIDE_INDEX {inside_index}')
+                            print(bcolors.FAIL+f'INSIDE_INDEX {{inside_index}}')
                             print(bcolors.FAIL +
-                                  f'CURRENT_INDEX {current_index}')
+                                  f'CURRENT_INDEX {{current_index}}')
                             for _ in range(inside_index - current_index):
                                 print(bcolors.FAIL+'REMOVED TOKEN ',
                                       retreived_tokens[-1])
                                 retreived_tokens.pop()
                             inside_index = current_index
                             print(
-                                bcolors.FAIL+f'FOUND TOKEN {node.value} but did not match with {token_flow[current_index]}')
+                                bcolors.FAIL+f'FOUND TOKEN {{node.value}} but did not match with {{token_flow[current_index]}}')
                             break
                     num_evaluated_elements += 1
             if num_evaluated_elements == len(production):
@@ -132,3 +141,8 @@ if __name__ == '__main__':
 
     initialize_actions()
 
+"""
+
+        file = open(file_name, "x")
+        file.write(new_file_content)
+        file.close()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 class Lexer:
     def __init__(self, name: str, keywords: dict[str, str], tokens: dict[str, str]):
         self.name = name
@@ -43,12 +44,14 @@ def analyze(input_stream):
     avance = 0
     is_evaluating = False
     token_flow = ''
+    token_value = ''
     for counter in range(len(input_stream) + 1):
         if counter == inicio: is_evaluating = True
         temporal_lex = input_stream[inicio:avance]
         print(temporal_lex)
         if temporal_lex in KEYWORDS and (not reduce(lambda cummulative, current : cummulative or bool(re.match(current[1], input_stream[inicio:avance + 1])), [*TOKENS.items(), *KEYWORDS.keys()], False)):
             token_flow += f"{{KEYWORDS[temporal_lex]}} "
+            token_value += f"{{temporal_lex}} "
             print('KEYWORD ')
             inicio = counter
             is_evaluating = False
@@ -70,6 +73,7 @@ def analyze(input_stream):
                     if not char_flow_has_furhter_match:
                         print(key)
                         token_flow += '{{}} '.format(key)
+                        token_value += '{{}} '.format(temporal_lex)
                         inicio = counter
                         is_evaluating = False
                         break
@@ -85,6 +89,7 @@ def analyze(input_stream):
     else:
         print(token_flow, file=open('token_flow.txt', 'a'))
         return {{
+            'token_value': token_value,
             'token_flow': token_flow,
             'residue': temporal_lex
         }}
@@ -95,6 +100,7 @@ if __name__ == '__main__':
         file = open(file_name, "x")
         file.write(new_file_content)
         file.close()
+
 
 if __name__ == '__main__':
     lexer = Lexer('lexer_template', {

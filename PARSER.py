@@ -3,10 +3,13 @@ from http.client import RemoteDisconnected
 import numpy as np
 
 
-token_flow = ['anonimous_token_-', 'numero', 'anonimous_token_+', 'numero', 'anonimous_token_*']
-token_value = ['-', '5', '+', '4', '*']
-terminals = {'numero': '^(0|1|2|3|4|5|6|7|8|9)((0|1|2|3|4|5|6|7|8|9))*$', 'IGNORE': '^$', 'anonimous_token_;': '^;$', 'anonimous_token_+': '^\\+$', 'anonimous_token_*': '^\\*$', 'anonimous_token_-': '^-$'}
-productions = {'EstadoInicial': {'elements': [[('EstadoInicialPrime', 'ident')]], 'type': 'kleene', 'action': None}, 'EstadoInicialPrime': {'elements': [[('Instruccion', 'ident'), ('anonimous_token_;', 'ident'), ('EstadoInicialPrime', 'ident')], [('epsilon', 'epsilon')]]}, 'Instruccion': {'elements': [[('Expresion', 'ident', {'body': ' print(resultado) ', 'parameters': '<ref resultado>'})]], 'type': 'NON_TERMINAL', 'action': {'body': ' resultado=0 ', 'parameters': False}}, 'Expresion': {'elements': [[('Termino', 'ident'), ('ExpresionPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2= 0, 0 ', 'parameters': '<ref int resultado>'}}, 'ExpresionPrime': {'elements': [[('anonimous_token_+', 'ident'), ('Termino', 'ident'), ('ExpresionPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1 ', 'parameters': '<ref resultado1>'}}, 'Termino': {'elements': [[('Factor', 'ident'), ('TerminoPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2 = 0, 0', 'parameters': '<ref int resultado>'}}, 'TerminoPrime': {'elements': [[('anonimous_token_*', 'ident'), ('Factor', 'ident'), ('TerminoPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1 ', 'parameters': '<ref resultado1>'}}, 'Factor': {'elements': [[('FactorPrime', 'ident'), ('FactorPrime', 'ident')]], 'type': 'kleene', 'action': None}, 'FactorPrime': {'elements': [[('Number', 'ident'), ('FactorPrime', 'ident')], [('epsilon', 'epsilon')]]}, 'Number': {'elements': [[('numero', 'ident', {'body': ' resultado = ultimoToken.obtenerValor() ', 'parameters': False})]], 'type': 'NON_TERMINAL', 'action': None}}
+token_flow = ['numeroToken', 'anonimous_token_mas', 'numeroToken', 'anonimous_token_*', 'numeroToken', 'anonimous_token_;',
+              'numeroToken', 'anonimous_token_mas', 'numeroToken', 'anonimous_token_;', 'numeroToken', 'anonimous_token_;']
+token_value = ['3', 'mas', '4', '*', '5', ';', '1', 'mas', '1', ';', '9', ';']
+terminals = {'numeroToken': '^(0|1|2|3|4|5|6|7|8|9)((0|1|2|3|4|5|6|7|8|9))*$', 'IGNORE': '^$',
+             'anonimous_token_;': '^;$', 'anonimous_token_mas': '^mas$', 'anonimous_token_*': '^\\*$'}
+productions = {'EstadoInicial': {'elements': [[('EstadoInicialPrime', 'ident')]], 'type': 'kleene', 'action': None}, 'EstadoInicialPrime': {'elements': [[('Instruccion', 'ident'), ('anonimous_token_;', 'ident'), ('EstadoInicialPrime', 'ident')], [('epsilon', 'epsilon')]]}, 'Instruccion': {'elements': [[('Expresion', 'ident', {'body': ' print("Resultado: " + resultado) ', 'parameters': '<ref resultado>'})]], 'type': 'NON_TERMINAL', 'action': {'body': ' resultado = 0 ', 'parameters': False}}, 'Expresion': {'elements': [[('Termino', 'ident'), ('ExpresionPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2 = 0, 0 ', 'parameters': '<ref int resultado>'}}, 'ExpresionPrime': {'elements': [[('anonimous_token_mas', 'ident'), ('Termino', 'ident'), ('ExpresionPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1;Û\t\t\t\t\t\t\t\t\t\t\t\t   print("Término: " + resultado) ', 'parameters': '<ref resultado1>'}}, 'Termino': {
+    'elements': [[('Factor', 'ident'), ('TerminoPrime', 'ident')]], 'type': 'kleene', 'action': {'body': ' resultado1, resultado2 = 0, 0 ', 'parameters': '<ref int resultado>'}}, 'TerminoPrime': {'elements': [[('anonimous_token_*', 'ident'), ('Factor', 'ident'), ('TerminoPrime', 'ident')], [('epsilon', 'epsilon')]], 'action': {'body': ' resultado = resultado1Û\t\t\t\t\t\t\t\t\t\t\t\t   print("Factor: " + resultado) ', 'parameters': '<ref resultado1>'}}, 'Factor': {'elements': [[('Numero', 'ident', {'body': ' resultado = resultado1;Û\t\t\t\t\t\t\t\t\t\t\t\t   print("Número: " + resultado) ', 'parameters': '<ref resultado1>'})]], 'type': 'NON_TERMINAL', 'action': {'body': ' resultado1 = 0 ', 'parameters': '<ref int resultado>'}}, 'Numero': {'elements': [[('numeroToken', 'ident', {'body': ' resultado = ultimoToken.obtenerValor()Û\t\t\t\t\t\t\t\t\t\t\t\t   print("Token: " + resultado) ', 'parameters': False})]], 'type': 'NON_TERMINAL', 'action': None}}
 
 
 class bcolors:
@@ -27,6 +30,7 @@ index = 0
 
 retreived_tokens = []
 
+
 def initialize_actions():
     file_content = ''
     for element in productions.keys():
@@ -40,7 +44,6 @@ def initialize_actions():
     file = open('functions.py', 'w')
     file.write(file_content)
     file.close()
-
 
 
 class GramaticElementNode:
@@ -131,4 +134,3 @@ if __name__ == '__main__':
         print(bcolors.FAIL+'INPUT NOT VALIDATED')
 
     initialize_actions()
-
